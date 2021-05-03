@@ -1,22 +1,22 @@
 package reservations.journey_planner.demo.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
-@Table(name="City",schema = "JOURNEY_PLANNER")
+@Table(name = "City", schema = "JOURNEY_PLANNER")
 public class City {
 
     @Id
-    @Column(name="NAME")
+    @Column(name = "NAME")
     private String name;
 
-    @Column(name="COUNTRY")
+    @Column(name = "COUNTRY")
     private String country;
 
-    @Column(name="POSTAL_CODE")
+    @Column(name = "POSTAL_CODE")
     private int zip_code;
 
+    @OneToMany(mappedBy = "city")
+    private List<TrainStation> trainStations;
 }

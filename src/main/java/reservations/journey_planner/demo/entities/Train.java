@@ -18,4 +18,6 @@ public class Train {
 
     @Column(name = "type")
     private String type;
+
+
 }
