@@ -14,9 +14,8 @@ import java.util.List;
 @Table(name = "PASSENGER", schema = "JOURNEY_PLANNER")
 public class Passenger {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
-    private int id;
+    private String id;
 
     @Column(name = "NAME")
     private String name;
@@ -24,8 +23,8 @@ public class Passenger {
     @Column(name = "SECOND_NAME")
     private String second_name;
 
-    @Column(name = "SSN")
-    private String SSN;
+    @Column(name="email")
+    private String email;
 
     @Column(name = "TOTAL_DISTANCE_TRAVELLED")
     private long distance_travelled;

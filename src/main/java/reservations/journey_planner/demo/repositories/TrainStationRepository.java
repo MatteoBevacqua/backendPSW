@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface TrainStationRepository extends JpaRepository<TrainStation, Integer> {
 
-    List<TrainStation> getTrainStationByCity(String city);
+    List<TrainStation> getTrainStationByCity_Name(String city);
 }

@@ -17,12 +17,12 @@ public class City {
 
     @Id
     @Column(name = "NAME")
-
     private String name;
 
     @Column(name = "COUNTRY")
     private String country;
 
+    @JsonIgnore
     @Column(name = "ZIP_CODE")
     private int zip_code;
 

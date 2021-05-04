@@ -15,4 +15,12 @@ public class CityService {
     public List<City> findAll() {
         return cityRepository.findAll();
     }
+
+    public List<City> findByName(String name) {
+        try {
+            return cityRepository.findAllByName(name);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

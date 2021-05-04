@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import reservations.journey_planner.demo.entities.Passenger;
 
 @Repository
-public interface PassengerRepository extends JpaRepository<Passenger,Integer> {
+public interface PassengerRepository extends JpaRepository<Passenger,String> {
 }

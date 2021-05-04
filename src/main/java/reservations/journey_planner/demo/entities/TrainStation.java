@@ -14,7 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "TRAIN_STATION", schema = "journey_planner")
 public class TrainStation {
-
+    @JsonIgnore
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,11 +28,11 @@ public class TrainStation {
     private City city;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "arrival")
+    @OneToMany(mappedBy = "arrivalStation")
     private List<Route> routes;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "departure")
+    @OneToMany(mappedBy = "departureStation")
     private List<Route> departure;
 
 }

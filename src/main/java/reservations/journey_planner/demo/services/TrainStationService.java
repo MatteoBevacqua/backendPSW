@@ -17,6 +17,10 @@ public class TrainStationService {
     }
 
     public List<TrainStation> getByCity(String city) {
-        return trainStationRepository.getTrainStationByCity(city);
+        try {
+            return trainStationRepository.getTrainStationByCity_Name(city);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

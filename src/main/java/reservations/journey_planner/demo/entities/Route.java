@@ -1,11 +1,12 @@
 package reservations.journey_planner.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -13,22 +14,23 @@ import java.sql.Date;
 @Entity
 @Table(name = "ACTIVE_ROUTES")
 public class Route {
+    @JsonIgnore
     @Id
     @Column(name="route_id")
     private int route_id;
 
-
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="TRAIN_ID")
     private Train train;
 
     @ManyToOne
     @JoinColumn(name="DESTINATION_STATION")
-    private TrainStation arrival;
+    private TrainStation arrivalStation;
 
     @ManyToOne
     @JoinColumn(name="SOURCE_STATION")
-    private TrainStation departure;
+    private TrainStation departureStation;
 
     @Column(name="departure_time")
     private Date departure_time;
