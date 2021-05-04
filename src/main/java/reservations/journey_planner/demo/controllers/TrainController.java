@@ -16,12 +16,12 @@ public class TrainController {
     @Autowired
     TrainService trainService;
 
-    @GetMapping("/getAll")
+    @GetMapping("/all")
     public ResponseEntity<List<Train>> getAll() {
         return new ResponseEntity<>(trainService.findAll(), HttpStatus.OK);
     }
 
-    @GetMapping("/searchByType/")
+    @GetMapping("/search/byType")
     public ResponseEntity<List<Train>> getTrainsByType(@RequestParam(name = "type") String type) {
         return new ResponseEntity(trainService.findByType(type), HttpStatus.OK);
     }

@@ -8,7 +8,7 @@ import java.util.List;
 @Repository
 public interface TrainRepository extends JpaRepository<Train, Integer> {
 
-    public List<Train> findAllByType(String type);
+     List<Train> findAllByType(String type);
 
 
 }
