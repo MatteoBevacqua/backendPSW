@@ -16,7 +16,6 @@ public class TrainStation {
     @Column(name = "services")
     private String services;
 
-
     @ManyToOne
     @JoinColumn(name = "CITY")
     private City city;
@@ -26,4 +25,5 @@ public class TrainStation {
 
     @OneToMany(mappedBy = "departure")
     private List<Route> departure;
+
 }

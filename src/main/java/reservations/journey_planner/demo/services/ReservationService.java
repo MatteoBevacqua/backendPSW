@@ -8,8 +8,7 @@ import reservations.journey_planner.demo.repositories.ReservationRepository;
 import java.util.List;
 @Service
 public class ReservationService {
-    @Autowired
-    private ReservationRepository reservationRepository;
+    @Autowired private ReservationRepository reservationRepository;
 
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
