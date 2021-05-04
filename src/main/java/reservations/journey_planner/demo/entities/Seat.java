@@ -1,5 +1,9 @@
 package reservations.journey_planner.demo.entities;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -7,6 +11,9 @@ enum FacingDirection {TRAVEL_DIRECTION, OPPOSITE};
 
 enum SeatType {BUSINESS, ECONOMY, FIRST};
 
+@Getter
+@Setter
+@Data
 @Entity
 @Table(name = "SEAT", schema = "JOURNEY_PLANNER")
 public class Seat {

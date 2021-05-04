@@ -1,5 +1,6 @@
 package reservations.journey_planner.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,13 +20,13 @@ public class City {
 
     private String name;
 
-
     @Column(name = "COUNTRY")
     private String country;
 
     @Column(name = "ZIP_CODE")
     private int zip_code;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "city")
     private List<TrainStation> trainStations;
 }
