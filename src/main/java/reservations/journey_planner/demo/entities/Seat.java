@@ -1,6 +1,7 @@
 package reservations.journey_planner.demo.entities;
 
 import javax.persistence.*;
+import java.util.List;
 
 enum FacingDirection {TRAVEL_DIRECTION, OPPOSITE};
 
@@ -32,4 +33,7 @@ public class Seat {
     @ManyToOne
     @JoinColumn(name = "TRAIN_ID")
     private Train train;
+
+    @ManyToMany(mappedBy = "seats")
+    private List<Reservation> reservations;
 }

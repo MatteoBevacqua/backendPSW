@@ -14,7 +14,7 @@ public class City {
     @Column(name = "COUNTRY")
     private String country;
 
-    @Column(name = "POSTAL_CODE")
+    @Column(name = "ZIP_CODE")
     private int zip_code;
 
     @OneToMany(mappedBy = "city")

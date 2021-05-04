@@ -1,6 +1,7 @@
 package reservations.journey_planner.demo.entities;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "TRAIN_STATION", schema = "journey_planner")
@@ -19,4 +20,10 @@ public class TrainStation {
     @ManyToOne
     @JoinColumn(name = "CITY")
     private City city;
+
+    @OneToMany(mappedBy = "arrival")
+    private List<Route> routes;
+
+    @OneToMany(mappedBy = "departure")
+    private List<Route> departure;
 }
