@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.experimental.UtilityClass;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import reservations.journey_planner.demo.entities.Passenger;
 
 @UtilityClass
 public class Utils {
@@ -15,6 +16,14 @@ public class Utils {
         return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    public static Passenger getPassengerFromToken(Jwt jwt){
+        Passenger p = new Passenger();
+        p.setEmail(getEmail(jwt));
+        p.setName(getName(jwt));
+        p.setSecond_name(getSecondName(jwt));
+        p.setId(jwt.getSubject());
+        return p;
+    }
     public static String getAuthServerId(Jwt jwt) {
         return getTokenNode(jwt).get("subject").asText();
     }

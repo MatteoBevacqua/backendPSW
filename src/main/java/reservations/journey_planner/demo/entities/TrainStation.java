@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.List;
@@ -12,27 +13,31 @@ import java.util.List;
 @Setter
 @Data
 @Entity
+
 @Table(name = "TRAIN_STATION", schema = "journey_planner")
 public class TrainStation {
     @JsonIgnore
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "name")
     private String name;
 
+
     @ManyToOne
     @JoinColumn(name = "CITY")
+    @JsonIgnore
     private City city;
 
-    @JsonIgnore
+
     @OneToMany(mappedBy = "arrivalStation")
+    @JsonIgnore
     private List<Route> routes;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "departureStation")
+    @JsonIgnore
     private List<Route> departure;
 
 }

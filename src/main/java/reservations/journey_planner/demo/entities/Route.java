@@ -33,9 +33,11 @@ public class Route {
     private TrainStation departureStation;
 
     @Column(name="departure_time")
-    private Date departure_time;
+    private Date departureTime;
 
     @Column(name="arrival_time")
-    private Date arrival_time;
+    private Date arrivalTime;
 
+    @Column(name="route_length")
+    private int routeLength;
 }

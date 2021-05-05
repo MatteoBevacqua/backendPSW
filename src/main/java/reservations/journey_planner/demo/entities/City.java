@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.List;
@@ -26,7 +27,7 @@ public class City {
     @Column(name = "ZIP_CODE")
     private int zip_code;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "city")
+    @JsonIgnore
     private List<TrainStation> trainStations;
 }

@@ -1,8 +1,10 @@
 package reservations.journey_planner.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.List;
@@ -29,6 +31,8 @@ public class Passenger {
     @Column(name = "TOTAL_DISTANCE_TRAVELLED")
     private long distance_travelled;
 
+    @JsonIgnore
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @OneToMany(mappedBy = "passenger")
     private List<Reservation> reservations;
 

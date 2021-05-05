@@ -6,12 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reservations.journey_planner.demo.configuration.Utils;
 import reservations.journey_planner.demo.entities.Passenger;
 import reservations.journey_planner.demo.entities.Reservation;
+import reservations.journey_planner.demo.entities.Route;
+import reservations.journey_planner.demo.exceptions.ReservationAlreadyExists;
 import reservations.journey_planner.demo.services.ReservationService;
 
 
@@ -41,6 +41,29 @@ public class ReservationController {
         return new ResponseEntity<>(reservationService.getReservationsByPassenger(p), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('passenger')")
+    @PostMapping("/new")
+    public ResponseEntity addReservation(@RequestBody Route r) {
+        Jwt jwt = Utils.getPrincipal();
+        Passenger p = Utils.getPassengerFromToken(jwt);
+        Reservation res = null;
+        System.out.println(r.toString());
+        try {
+            res = reservationService.addNewReservationIfPossible(p, r);
+        } catch (ReservationAlreadyExists e) {
+            return ResponseEntity.status(HttpStatus.OK).body("You already made a reservation,change or delete the existing one");
+        }
+        return new ResponseEntity<>(res,HttpStatus.OK);
+    }
 
+    /*
+
+    //TODO
+    @PreAuthorize("hasAuthority('passenger')")
+    @PostMapping("/new")
+    public void modifyReservation(@RequestBody Route r) {
+
+    }
+*/
 }
 

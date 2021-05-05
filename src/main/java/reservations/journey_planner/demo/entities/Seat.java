@@ -18,7 +18,7 @@ enum SeatType {BUSINESS, ECONOMY, FIRST};
 @Table(name = "SEAT", schema = "JOURNEY_PLANNER")
 public class Seat {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
 
