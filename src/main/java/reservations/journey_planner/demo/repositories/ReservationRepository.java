@@ -17,4 +17,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     List<Reservation> findAllReservationsByPassenger_IdAndBookedRoute(String id, Route r);
 
+    List<Reservation> findAllByBookedRoute(Route r);
 }

@@ -59,6 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 antMatchers("/routes/**").permitAll().
                 antMatchers("/trains/**").permitAll().
                 antMatchers("/stations/**").permitAll().
+                antMatchers("/seats/**").permitAll().
                 anyRequest().authenticated().and().oauth2ResourceServer().jwt().jwtAuthenticationConverter(authenticationConverter())
         ;
     }

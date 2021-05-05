@@ -1,5 +1,6 @@
 package reservations.journey_planner.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,9 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.List;
 
-enum FacingDirection {TRAVEL_DIRECTION, OPPOSITE};
 
-enum SeatType {BUSINESS, ECONOMY, FIRST};
 
 @Getter
 @Setter
@@ -26,7 +25,8 @@ public class Seat {
     private int wagon_number;
 
     @Column(name = "CLASS", columnDefinition = "ENUM('ECONOMY','BUSINESS','FIRST')")
-    private SeatType seatClass;
+    @Enumerated(EnumType.STRING)
+    private SeatClass seatClass;
 
     @Column(name = "ADULT_PRICE")
     private int adult_price;
@@ -35,12 +35,16 @@ public class Seat {
     private int children_price;
 
     @Column(name = "FACING_DIRECTION", columnDefinition = "ENUM('FACING_DIRECTION','OPPOSITE')")
+    @Enumerated(EnumType.STRING)
     private FacingDirection direction;
 
     @ManyToOne
     @JoinColumn(name = "TRAIN_ID")
+    @JsonIgnore
     private Train train;
 
+
     @ManyToMany(mappedBy = "seats")
+    @JsonIgnore
     private List<Reservation> reservations;
 }
