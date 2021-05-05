@@ -28,6 +28,7 @@ public class SeatService {
     }
 
     public List<Seat> findAvailableByRoute(Route r) {
+
         return seatRepository.findSeatsNative(r.getRoute_id());
     }
 }

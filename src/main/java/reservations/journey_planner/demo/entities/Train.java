@@ -27,5 +27,6 @@ public class Train {
     @OneToMany(mappedBy = "train")
     private List<Seat> seats;
 
-
+    @Column(name="TOTAL_SEATS")
+    private int totalSeats;
 }

@@ -40,4 +40,10 @@ public class Route {
 
     @Column(name="route_length")
     private int routeLength;
+
+    @Column(name="AVAILABLE_SEATS")
+    private int availableSeats;
+
+    @Version
+    private long version;
 }
