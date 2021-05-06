@@ -43,7 +43,9 @@ public class Route {
 
     @Column(name="AVAILABLE_SEATS")
     private int availableSeats;
-
+/*
     @Version
     private long version;
+
+ */
 }

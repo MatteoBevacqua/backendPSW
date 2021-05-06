@@ -9,7 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Date;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -34,8 +35,10 @@ public class Reservation {
     @CreationTimestamp
     private Timestamp reservation_booking_date;
 
-    @JsonIgnore
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @ManyToMany
-    @JoinTable(name = "SEATS_PER_RESERVATION")
-    private List<Seat> seats;
+    @JoinTable(name = "SEATS_PER_RESERVATION",
+    joinColumns = @JoinColumn(name = "RESERVATION_ID"),
+    inverseJoinColumns = @JoinColumn(name="SEAT_ID"))
+    private List<Seat> seats = new ArrayList<>();
 }

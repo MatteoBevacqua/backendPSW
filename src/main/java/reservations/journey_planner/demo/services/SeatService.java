@@ -13,6 +13,7 @@ import reservations.journey_planner.demo.repositories.SeatRepository;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SeatService {
@@ -28,7 +29,8 @@ public class SeatService {
     }
 
     public List<Seat> findAvailableByRoute(Route r) {
-
         return seatRepository.findSeatsNative(r.getRoute_id());
     }
+
+
 }
