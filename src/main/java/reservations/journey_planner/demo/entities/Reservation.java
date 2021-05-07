@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Setter
 @Data
 @Entity
+@ToString
 @Table(name = "RESERVATION", schema = "JOURNEY_PLANNER")
 public class Reservation {
     @Id
@@ -26,6 +28,7 @@ public class Reservation {
     @ManyToOne
     private Passenger passenger;
 
+    @JsonIgnore
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @ManyToOne
     @JoinColumn(name = "ROUTE")
@@ -35,10 +38,5 @@ public class Reservation {
     @CreationTimestamp
     private Timestamp reservation_booking_date;
 
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @ManyToMany
-    @JoinTable(name = "SEATS_PER_RESERVATION",
-    joinColumns = @JoinColumn(name = "RESERVATION_ID"),
-    inverseJoinColumns = @JoinColumn(name="SEAT_ID"))
-    private List<Seat> seats = new ArrayList<>();
+
 }

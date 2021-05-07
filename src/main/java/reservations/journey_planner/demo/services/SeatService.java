@@ -29,7 +29,7 @@ public class SeatService {
     }
 
     public List<Seat> findAvailableByRoute(Route r) {
-        return seatRepository.findSeatsNative(r.getRoute_id());
+        return seatRepository.findSeatsNative(r.getId());
     }
 
 

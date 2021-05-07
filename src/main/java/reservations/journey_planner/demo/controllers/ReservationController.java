@@ -48,11 +48,13 @@ public class ReservationController {
         try {
             res = reservationService.addNewReservationIfPossible(p, toBook, seatsToBook);
         } catch (ReservationAlreadyExists e) {
-            System.out.println("Reservation già esistente");
-            return ResponseEntity.status(HttpStatus.OK).body("You already made a reservation,change or delete the existing one");
+            res = reservationService.getByPassengerIdAndRoute(jwt.getSubject(), r.getRoute().getId());
+            return new ResponseEntity<>(res, HttpStatus.NOT_ACCEPTABLE);
         } catch (SeatsAlreadyBookedException e) {
             System.out.println("Seats already booked");
             return new ResponseEntity<List<Seat>>(seatService.findAvailableByRoute(r.getRoute()), HttpStatus.OK);
+        } catch (Exception e){
+            System.out.println("you were late");
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

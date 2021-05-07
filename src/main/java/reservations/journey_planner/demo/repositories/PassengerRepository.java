@@ -7,6 +7,7 @@ import reservations.journey_planner.demo.entities.Passenger;
 @Repository
 public interface PassengerRepository extends JpaRepository<Passenger,String> {
 
+    Passenger findPassengerById(String id);
 
     boolean existsById(String id);
 }

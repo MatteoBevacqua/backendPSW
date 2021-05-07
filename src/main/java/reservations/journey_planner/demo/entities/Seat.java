@@ -4,10 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
+import org.springframework.data.jpa.repository.Query;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static javax.persistence.LockModeType.PESSIMISTIC_READ;
 
 
 
@@ -45,7 +49,11 @@ public class Seat {
     private Train train;
 
 
-    @ManyToMany(mappedBy = "seats")
-    @JsonIgnore
-    private List<Reservation> reservations = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "Seat{" +
+                "id=" + id +
+                '}';
+    }
 }

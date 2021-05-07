@@ -14,10 +14,9 @@ import java.util.Date;
 @Entity
 @Table(name = "ACTIVE_ROUTES")
 public class Route {
-    @JsonIgnore
     @Id
     @Column(name="route_id")
-    private int route_id;
+    private int id;
 
     @JsonIgnore
     @ManyToOne
@@ -25,12 +24,14 @@ public class Route {
     private Train train;
 
     @ManyToOne
+    @JoinColumn(name="SOURCE_STATION")
+    private TrainStation departureStation;
+
+    @ManyToOne
     @JoinColumn(name="DESTINATION_STATION")
     private TrainStation arrivalStation;
 
-    @ManyToOne
-    @JoinColumn(name="SOURCE_STATION")
-    private TrainStation departureStation;
+
 
     @Column(name="departure_time")
     private Date departureTime;
