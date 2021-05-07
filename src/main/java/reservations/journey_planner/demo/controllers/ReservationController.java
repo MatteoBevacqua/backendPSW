@@ -53,8 +53,8 @@ public class ReservationController {
         } catch (SeatsAlreadyBookedException e) {
             System.out.println("Seats already booked");
             return new ResponseEntity<List<Seat>>(seatService.findAvailableByRoute(r.getRoute()), HttpStatus.OK);
-        } catch (Exception e){
-            System.out.println("you were late");
+        } catch (Exception e) {
+            System.out.println(jwt.getSubject() + " you were late");
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

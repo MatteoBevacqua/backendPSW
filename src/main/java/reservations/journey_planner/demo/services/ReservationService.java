@@ -66,8 +66,10 @@ public class ReservationService {
         List<SeatsInReservation> inReservations = q.getResultList();
         Reservation r = new Reservation();
         freshP.setDistance_travelled(freshP.getDistance_travelled() + test.getRouteLength());
+        test.setAvailableSeats(test.getAvailableSeats() - fromDB.size());
         r.setBookedRoute(test);
         r.setPassenger(freshP);
+        r.setSeatsBooked(inReservations.stream().map(SeatsInReservation::getSeat).collect(Collectors.toList()));
         r = reservationRepository.save(r);
         Iterator<Seat> seatIt = fromDB.iterator();
         for (SeatsInReservation x : inReservations) {
@@ -76,7 +78,6 @@ public class ReservationService {
         }
         inReservations.forEach(entityManager::persist);
         return r;
-
 
     }
 

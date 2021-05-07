@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -18,6 +19,7 @@ public class Route {
     @Column(name="route_id")
     private int id;
 
+    @ToString.Exclude
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="TRAIN_ID")
@@ -32,9 +34,9 @@ public class Route {
     private TrainStation arrivalStation;
 
 
-
     @Column(name="departure_time")
     private Date departureTime;
+
 
     @Column(name="arrival_time")
     private Date arrivalTime;

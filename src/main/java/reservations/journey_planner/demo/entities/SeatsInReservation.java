@@ -1,5 +1,6 @@
 package reservations.journey_planner.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,16 +18,17 @@ public class SeatsInReservation {
     @Column(name = "id")
     private int id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "RESERVATION_ID")
     private Reservation reservation;
 
-
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "SEAT_ID")
     private Seat seat;
 
-    @ToString.Exclude
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "ROUTE_ID")
     private Route route;

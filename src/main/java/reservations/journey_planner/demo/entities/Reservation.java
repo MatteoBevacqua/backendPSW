@@ -28,7 +28,6 @@ public class Reservation {
     @ManyToOne
     private Passenger passenger;
 
-    @JsonIgnore
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @ManyToOne
     @JoinColumn(name = "ROUTE")
@@ -38,5 +37,12 @@ public class Reservation {
     @CreationTimestamp
     private Timestamp reservation_booking_date;
 
+    @JsonIgnore
+    @ToString.Exclude
+    @Cascade(org.hibernate.annotations.CascadeType.MERGE)
+    @OneToMany(targetEntity = SeatsInReservation.class,mappedBy = "reservation")
+    private List<SeatsInReservation> reserved_seats = new ArrayList<>();
 
+    @Transient
+    List<Seat> seatsBooked;
 }

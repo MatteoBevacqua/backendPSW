@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Cascade;
 import org.springframework.data.jpa.repository.Query;
 
@@ -48,6 +49,10 @@ public class Seat {
     @JsonIgnore
     private Train train;
 
+    @OneToMany(mappedBy = "seat",targetEntity = SeatsInReservation.class,cascade = CascadeType.MERGE)
+    @JsonIgnore
+    @ToString.Exclude
+    private List<SeatsInReservation> reservations = new ArrayList<>();
 
 
     @Override

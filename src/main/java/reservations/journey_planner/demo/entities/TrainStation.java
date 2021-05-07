@@ -32,10 +32,12 @@ public class TrainStation {
     private City city;
 
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "arrivalStation")
     @JsonIgnore
     private List<Route> routes;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "departureStation")
     @JsonIgnore
     private List<Route> departure;
