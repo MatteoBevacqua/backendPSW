@@ -1,6 +1,7 @@
 package reservations.journey_planner.demo.controllers;
 
 
+import com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,9 +55,11 @@ public class ReservationController {
             return new ResponseEntity<>(res, HttpStatus.NOT_ACCEPTABLE);
         } catch (SeatsAlreadyBookedException e) {
             System.out.println("Seats already booked");
-            return new ResponseEntity<List<Seat>>(seatService.findAvailableByRoute(r.getRoute()), HttpStatus.OK);
+            e.getAvailableSeatsLeft().stream().map(s -> s.getId()).forEach(System.out::println);
+            return new ResponseEntity<List<Seat>>(e.getAvailableSeatsLeft(), HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(jwt.getSubject() + " you were late");
+            System.out.println("Transation rolled back");
+            return ResponseEntity.status(HttpStatus.OK).body("Some of the seats you were trying to book were already taken");
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

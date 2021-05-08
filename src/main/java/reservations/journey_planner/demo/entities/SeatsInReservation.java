@@ -33,4 +33,8 @@ public class SeatsInReservation {
     @JoinColumn(name = "ROUTE_ID")
     private Route route;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private long version;
+
 }

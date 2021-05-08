@@ -6,20 +6,13 @@ import org.springframework.transaction.annotation.Propagation;
 import reservations.journey_planner.demo.entities.*;
 import reservations.journey_planner.demo.exceptions.ReservationAlreadyExists;
 import reservations.journey_planner.demo.exceptions.SeatsAlreadyBookedException;
-import reservations.journey_planner.demo.repositories.PassengerRepository;
-import reservations.journey_planner.demo.repositories.ReservationRepository;
+import reservations.journey_planner.demo.repositories.*;
 
 import org.springframework.transaction.annotation.Transactional;
-import reservations.journey_planner.demo.repositories.RouteRepository;
-import reservations.journey_planner.demo.repositories.SeatRepository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +28,7 @@ public class ReservationService {
     @Autowired
     private SeatRepository seatRepository;
     @Autowired
-    EntityManager entityManager;
+    private SeatInReservationRepository seatInReservationRepository;
 
     @Transactional(readOnly = true)
     public List<Reservation> findAll() {
@@ -58,19 +51,18 @@ public class ReservationService {
         Passenger freshP = passengerService.savePassengerIfNotExists(passenger);
         Route test = routeRepository.findRouteById(route.getId());
         System.out.println(passenger.getId());
-        System. out.println(route.getId());
+        System.out.println(route.getId());
         if (reservationRepository.existsReservationsByPassenger_IdAndBookedRoute(passenger.getId(), test))
             throw new ReservationAlreadyExists();
-        Query q = entityManager.createNativeQuery("SELECT * FROM SEATS_PER_RESERVATION AS S WHERE S.SEAT_ID IN (:ids) AND S.ROUTE_ID=(:route) AND S.RESERVATION_ID IS NULL FOR UPDATE", SeatsInReservation.class);
-        q.setParameter("ids", seats.stream().map(Seat::getId).collect(Collectors.toList())).setParameter("route", route.getId());
-        List<SeatsInReservation> inReservations = q.getResultList();
-        List<Seat> fromDB = seatRepository.findByIdIn(seats.stream().map(Seat::getId).collect(Collectors.toList()));
-        if (inReservations.size() != fromDB.size()) //qualcuno potrebbe essere stato prenotato
-            throw new SeatsAlreadyBookedException();
-        System.out.println(inReservations.size());
+        List<SeatsInReservation> inReservations = seatInReservationRepository.findAllBySeat_IdInAndRoute_IdAndReservationIsNull(seats.stream().map(Seat::getId).collect(Collectors.toList()), route.getId());
+        if (inReservations.size() != seats.size()) { //qualcuno potrebbe essere stato prenotato
+            //nessun problema perchè dopo l'eccezione i seats diventano detached
+            List<Seat> availableLeft = inReservations.stream().map(SeatsInReservation::getSeat).collect(Collectors.toList());
+            throw new SeatsAlreadyBookedException(availableLeft);
+        }
         Reservation r = new Reservation();
+        List<Seat> fromDB = seatRepository.findByIdIn(seats.stream().map(Seat::getId).collect(Collectors.toList()));
         freshP.setDistance_travelled(freshP.getDistance_travelled() + test.getRouteLength());
-        passengerRepository.save(freshP);
         test.setAvailableSeats(test.getAvailableSeats() - fromDB.size());
         r.setBookedRoute(test);
         r.setPassenger(freshP);
@@ -80,8 +72,9 @@ public class ReservationService {
         for (SeatsInReservation x : inReservations) {
             x.setReservation(r);
             x.setSeat(seatIt.next());
+            seatInReservationRepository.save(x);
         }
-        inReservations.forEach(entityManager::persist);
+        passengerRepository.save(freshP);
         return reservationRepository.save(r);
 
     }
