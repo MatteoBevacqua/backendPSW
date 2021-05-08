@@ -21,6 +21,7 @@ import reservations.journey_planner.demo.services.SeatService;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*", exposedHeaders = "If-Match")
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {

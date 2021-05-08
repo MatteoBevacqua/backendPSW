@@ -25,7 +25,7 @@ public class City {
 
     @JsonIgnore
     @Column(name = "ZIP_CODE")
-    private int zip_code;
+    private int zipCode;
 
     @OneToMany(mappedBy = "city")
     @JsonIgnore
