@@ -13,6 +13,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "SEATS_PER_RESERVATION")
 public class SeatsInReservation {
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
@@ -23,7 +24,6 @@ public class SeatsInReservation {
     @JoinColumn(name = "RESERVATION_ID")
     private Reservation reservation;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "SEAT_ID")
     private Seat seat;

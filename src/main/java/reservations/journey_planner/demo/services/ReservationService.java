@@ -19,6 +19,7 @@ import javax.persistence.Query;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,28 +57,32 @@ public class ReservationService {
     public Reservation addNewReservationIfPossible(Passenger passenger, Route route, List<Seat> seats) {
         Passenger freshP = passengerService.savePassengerIfNotExists(passenger);
         Route test = routeRepository.findRouteById(route.getId());
+        System.out.println(passenger.getId());
+        System. out.println(route.getId());
         if (reservationRepository.existsReservationsByPassenger_IdAndBookedRoute(passenger.getId(), test))
             throw new ReservationAlreadyExists();
-        List<Seat> fromDB = seatRepository.findByIdIn(seats.stream().map(Seat::getId).collect(Collectors.toList()));
-        if (!seatRepository.findSeatsNative(route.getId()).containsAll(fromDB))
-            throw new SeatsAlreadyBookedException();
-        Query q = entityManager.createNativeQuery("SELECT * FROM SEATS_PER_RESERVATION AS S WHERE S.SEAT_ID IN (:ids) AND S.ROUTE_ID=(:route) FOR UPDATE", SeatsInReservation.class);
+        Query q = entityManager.createNativeQuery("SELECT * FROM SEATS_PER_RESERVATION AS S WHERE S.SEAT_ID IN (:ids) AND S.ROUTE_ID=(:route) AND S.RESERVATION_ID IS NULL FOR UPDATE", SeatsInReservation.class);
         q.setParameter("ids", seats.stream().map(Seat::getId).collect(Collectors.toList())).setParameter("route", route.getId());
         List<SeatsInReservation> inReservations = q.getResultList();
+        List<Seat> fromDB = seatRepository.findByIdIn(seats.stream().map(Seat::getId).collect(Collectors.toList()));
+        if (inReservations.size() != fromDB.size()) //qualcuno potrebbe essere stato prenotato
+            throw new SeatsAlreadyBookedException();
+        System.out.println(inReservations.size());
         Reservation r = new Reservation();
         freshP.setDistance_travelled(freshP.getDistance_travelled() + test.getRouteLength());
+        passengerRepository.save(freshP);
         test.setAvailableSeats(test.getAvailableSeats() - fromDB.size());
         r.setBookedRoute(test);
         r.setPassenger(freshP);
+        r.setReserved_seats(inReservations);
         r.setSeatsBooked(inReservations.stream().map(SeatsInReservation::getSeat).collect(Collectors.toList()));
-        r = reservationRepository.save(r);
         Iterator<Seat> seatIt = fromDB.iterator();
         for (SeatsInReservation x : inReservations) {
             x.setReservation(r);
             x.setSeat(seatIt.next());
         }
         inReservations.forEach(entityManager::persist);
-        return r;
+        return reservationRepository.save(r);
 
     }
 
