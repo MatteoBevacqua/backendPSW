@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -28,7 +27,6 @@ public class Reservation {
     @ManyToOne
     private Passenger passenger;
 
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @ManyToOne
     @JoinColumn(name = "ROUTE")
     private Route bookedRoute;
@@ -38,9 +36,9 @@ public class Reservation {
     private Timestamp reservation_booking_date;
 
 
-    @Cascade(org.hibernate.annotations.CascadeType.MERGE)
-    @OneToMany(targetEntity = SeatsInReservation.class,mappedBy = "reservation")
-    private List<SeatsInReservation> reserved_seats = new ArrayList<>();
+    //NESSUN CASCADE,NON VANNO ELIMINATI quanto viene eliminata la res
+    @OneToMany(targetEntity = SeatsAndReservation.class,mappedBy = "reservation")
+    private List<SeatsAndReservation> reserved_seats = new ArrayList<>();
 
 
     @JsonIgnore

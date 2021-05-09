@@ -1,7 +1,6 @@
 package reservations.journey_planner.demo.exceptions;
 
 import lombok.Getter;
-import lombok.Setter;
 import reservations.journey_planner.demo.entities.Seat;
 
 import java.util.List;

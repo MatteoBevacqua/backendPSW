@@ -11,13 +11,17 @@ import java.util.List;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
 
+    Reservation findByIdAndPassenger_Id(Integer resId, String pid);
+
     List<Reservation> findAllByPassenger(Passenger p);
 
     boolean existsReservationsByPassenger_IdAndBookedRoute(String id, Route r);
 
     List<Reservation> findAllReservationsByPassenger_IdAndBookedRoute(String id, Route r);
 
-    Reservation findReservationByPassenger_IdAndBookedRoute_Id(String pid,Integer rid);
+    Reservation findReservationByPassenger_IdAndBookedRoute_Id(String pid, Integer rid);
 
     List<Reservation> findAllByBookedRoute(Route r);
+
+
 }

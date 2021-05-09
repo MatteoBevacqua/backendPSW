@@ -13,6 +13,7 @@ import reservations.journey_planner.demo.entities.Passenger;
 import reservations.journey_planner.demo.entities.Reservation;
 import reservations.journey_planner.demo.entities.Route;
 import reservations.journey_planner.demo.entities.Seat;
+import reservations.journey_planner.demo.exceptions.NoSuchReservationException;
 import reservations.journey_planner.demo.exceptions.ReservationAlreadyExists;
 import reservations.journey_planner.demo.exceptions.SeatsAlreadyBookedException;
 import reservations.journey_planner.demo.requestPOJOs.RouteAndSeats;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", exposedHeaders = "If-Match")
 @RestController
+@PreAuthorize("hasAuthority('passenger')")
 @RequestMapping("/reservations")
 public class ReservationController {
     @Autowired
@@ -32,14 +34,13 @@ public class ReservationController {
     SeatService seatService;
 
     @GetMapping("/all")
-    @PreAuthorize("hasAuthority('passenger')")
     public ResponseEntity<List<Reservation>> getAll() {
         Jwt jwt = Utils.getPrincipal();
         Passenger p = Utils.getPassengerFromToken(jwt);
         return new ResponseEntity<>(reservationService.getReservationsByPassenger(p), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('passenger')")
+
     @PostMapping("/new")
     public ResponseEntity addReservation(@RequestBody RouteAndSeats r) {
         Jwt jwt = Utils.getPrincipal();
@@ -57,11 +58,23 @@ public class ReservationController {
             System.out.println("Seats already booked");
             e.getAvailableSeatsLeft().stream().map(s -> s.getId()).forEach(System.out::println);
             return new ResponseEntity<List<Seat>>(e.getAvailableSeatsLeft(), HttpStatus.OK);
-        } catch (Exception e) {
+        }  /*  catch (Exception e) {
+
             System.out.println("Transation rolled back");
             return ResponseEntity.status(HttpStatus.OK).body("Some of the seats you were trying to book were already taken");
-        }
+        }*/
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> delete(@RequestBody Reservation r) {
+        Passenger richiedente = Utils.getPassengerFromToken(Utils.getPrincipal());
+        try {
+            reservationService.deleteReservation(r, richiedente);
+        } catch (NoSuchReservationException e) {
+            return new ResponseEntity<>("No such reservation found",HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
     /*
