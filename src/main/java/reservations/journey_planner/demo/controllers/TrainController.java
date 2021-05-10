@@ -13,8 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/trains")
 public class TrainController {
-    @Autowired
-    TrainService trainService;
+    @Autowired TrainService trainService;
 
     @GetMapping("/all")
     public ResponseEntity<List<Train>> getAll() {

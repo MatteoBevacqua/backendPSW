@@ -25,17 +25,28 @@ public class RouteController {
 
     @GetMapping("search/byCity")
     public ResponseEntity<List<Route>> getByCity(@RequestParam(name = "city") String cityName) {
-        return new ResponseEntity<>(routeService.findByCityBothDepartureAndArrival(cityName), HttpStatus.OK);
+        return new ResponseEntity<>(routeService.findByArrivalCity(cityName), HttpStatus.OK);
+
     }
 
     @GetMapping("search/byDepartureCity")
-    public ResponseEntity<List<Route>> getByDepartureCity(@RequestParam(name = "city") String cityName) {
-        return new ResponseEntity<>(routeService.findByDepartureCity(cityName), HttpStatus.OK);
+    public ResponseEntity<List<Route>> getByDepartureCity(@RequestParam(name = "city") String cityName, @RequestParam(value = "seatsLeft", required = false) Integer seatsLeft) {
+        if (seatsLeft == null)
+            return new ResponseEntity<>(routeService.findByDepartureCity(cityName), HttpStatus.OK);
+        return new ResponseEntity<>(routeService.findByArrivalCityAndXSeatsLeft(cityName, seatsLeft), HttpStatus.OK);
+
     }
+ /*   @GetMapping("search/byDepartureCity")
+    public ResponseEntity<List<Route>> getByDepartureCity(@RequestParam(name = "city") String cityName) {
+        return new ResponseEntity<>(routeService.findByArrivalCity(cityName), HttpStatus.OK);
+
+    }*/
 
     @GetMapping("search/byArrivalCity")
-    public ResponseEntity<List<Route>> getByArrivalCity(@RequestParam(name = "city") String cityName) {
-        return new ResponseEntity<>(routeService.findByArrivalCity(cityName), HttpStatus.OK);
+    public ResponseEntity<List<Route>> getByArrivalCity(@RequestParam(name = "city") String cityName, @RequestParam(value = "seatsLeft", required = false) Integer seatsLeft) {
+        if (seatsLeft == null)
+            return new ResponseEntity<>(routeService.findByArrivalCity(cityName), HttpStatus.OK);
+        return new ResponseEntity<>(routeService.findByArrivalCityAndXSeatsLeft(cityName, seatsLeft), HttpStatus.OK);
     }
 
 

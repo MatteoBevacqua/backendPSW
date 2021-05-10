@@ -15,10 +15,10 @@ import static javax.persistence.LockModeType.PESSIMISTIC_READ;
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, Integer> {
 
-    @Query(value = "SELECT * FROM SEAT WHERE SEAT.ID NOT IN (SELECT SEAT_ID FROM SEATS_PER_RESERVATION WHERE RESERVATION_ID IS NOT NULL AND ROUTE_ID=?1)", nativeQuery = true)
-    List<Seat> findSeatsNative(@Param("route_id") Integer route);
+    @Query(value = "SELECT * FROM SEAT WHERE SEAT.ID IN (SELECT SEAT_ID FROM SEATS_PER_RESERVATION WHERE RESERVATION_ID IS NULL AND ROUTE_ID=?1)", nativeQuery = true)
+    List<Seat> findSeatsNative( Integer route);
 
-        //JPQL s member of r.seats s.id IN (:ids)  and r.bookedRoute.route_id=:route
+
     List<Seat> findByIdIn(List<Integer> ids);
 
 

@@ -51,6 +51,7 @@ public class ReservationService {
         if (reservationRepository.existsReservationsByPassenger_IdAndBookedRoute(passenger.getId(), test))
             throw new ReservationAlreadyExists();
         List<SeatsAndReservation> inReservations = seatInReservationRepository.findAllBySeat_IdInAndRoute_IdAndReservationIsNull(seats.stream().map(Seat::getId).collect(Collectors.toList()), route.getId());
+        inReservations.forEach(res -> System.out.println(res.getSeat() + " " + res.getReservation()));
         if (inReservations.size() != seats.size()) { //qualcuno potrebbe essere stato prenotato
             List<Seat> availableLeft = inReservations.stream().map(SeatsAndReservation::getSeat).collect(Collectors.toList());
             throw new SeatsAlreadyBookedException(availableLeft);
@@ -58,7 +59,6 @@ public class ReservationService {
         Reservation r = new Reservation();
         List<Seat> fromDB = seatRepository.findByIdIn(seats.stream().map(Seat::getId).collect(Collectors.toList()));
         freshP.setDistance_travelled(freshP.getDistance_travelled() + test.getRouteLength());
-        test.setAvailableSeats(test.getAvailableSeats() - fromDB.size());
         r.setBookedRoute(test);
         r.setPassenger(freshP);
         r.setReserved_seats(inReservations);
@@ -70,10 +70,11 @@ public class ReservationService {
 
     @Transactional(readOnly = false)
     public void deleteReservation(Reservation r, Passenger p) {
-        if (reservationRepository.findByIdAndPassenger_Id(r.getId(), p.getId()) == null)
+        Reservation res;
+        if ((res = reservationRepository.findByIdAndPassenger_Id(r.getId(), p.getId())) == null)
             throw new NoSuchReservationException();
-        Reservation res = reservationRepository.findById(r.getId()).get();
         List<SeatsAndReservation> seats = seatInReservationRepository.findAllByRoute_IdAndReservation_Id(res.getBookedRoute().getId(), res.getId());
+        Route route = routeRepository.findRouteById(res.getId());
         seats.forEach(seat -> seat.setReservation(null));
         reservationRepository.delete(res);
     }

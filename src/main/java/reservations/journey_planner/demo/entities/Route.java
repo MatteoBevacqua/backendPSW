@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -33,6 +34,8 @@ public class Route {
     @JoinColumn(name="DESTINATION_STATION")
     private TrainStation arrivalStation;
 
+    @OneToMany(mappedBy = "route")
+    private List<SeatsAndReservation> bookableSeats;
 
     @Column(name="departure_time")
     private Date departureTime;
@@ -44,8 +47,6 @@ public class Route {
     @Column(name="route_length")
     private int routeLength;
 
-    @Column(name="AVAILABLE_SEATS")
-    private int availableSeats;
 /*
     @Version
     private long version;
