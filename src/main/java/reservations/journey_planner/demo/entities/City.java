@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
@@ -14,7 +15,10 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "CITY", schema = "JOURNEY_PLANNER")
-public class City {
+public class City implements Serializable {
+
+    private final static long serialVersionUID=1;
+
 
     @Id
     @Column(name = "NAME")
@@ -23,11 +27,10 @@ public class City {
     @Column(name = "COUNTRY")
     private String country;
 
-    @JsonIgnore
-    @Column(name = "ZIP_CODE")
-    private int zipCode;
 
+
+    @ToString.Exclude
     @OneToMany(mappedBy = "city")
     @JsonIgnore
-    private List<TrainStation> trainStations;
+    private transient List<TrainStation> trainStations;
 }
