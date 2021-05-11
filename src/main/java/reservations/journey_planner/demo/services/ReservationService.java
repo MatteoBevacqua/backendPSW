@@ -9,8 +9,10 @@ import reservations.journey_planner.demo.exceptions.SeatsAlreadyBookedException;
 import reservations.journey_planner.demo.repositories.*;
 
 import org.springframework.transaction.annotation.Transactional;
+import reservations.journey_planner.demo.requestPOJOs.ModifiedBookingDTO;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,7 +48,7 @@ public class ReservationService {
 
     @Transactional(readOnly = false)
     public Reservation addNewReservationIfPossible(Passenger passenger, Route route, List<Seat> seats) {
-        Passenger freshP = passengerService.savePassengerIfNotExists(passenger);
+        Passenger freshP = passengerRepository.findPassengerById(passenger.getId());
         Route test = routeRepository.findRouteById(route.getId());
         if (reservationRepository.existsReservationsByPassenger_IdAndBookedRoute(passenger.getId(), test))
             throw new ReservationAlreadyExists();
@@ -62,7 +64,6 @@ public class ReservationService {
         r.setBookedRoute(test);
         r.setPassenger(freshP);
         r.setReserved_seats(inReservations);
-        r.setSeatsBooked(inReservations.stream().map(SeatsAndReservation::getSeat).collect(Collectors.toList()));
         inReservations.forEach(seatAndRes -> seatAndRes.setReservation(r));
         return reservationRepository.save(r);
 
@@ -77,6 +78,23 @@ public class ReservationService {
         Route route = routeRepository.findRouteById(res.getId());
         seats.forEach(seat -> seat.setReservation(null));
         reservationRepository.delete(res);
+    }
+
+    @Transactional(readOnly = false)
+    public Reservation modifyReservation(Passenger p, ModifiedBookingDTO mod) {
+        Reservation r;
+        if ((r = reservationRepository.findByIdAndPassenger_Id(mod.getToModify().getId(), p.getId())) == null)
+            throw new NoSuchReservationException();
+        List<Integer> toAddIds = mod.getToAdd().stream().map(Seat::getId).collect(Collectors.toList());
+        List<SeatsAndReservation> toAddFromDb = seatInReservationRepository.findAllBySeat_IdInAndRoute_IdAndReservationIsNull(toAddIds, r.getBookedRoute().getId());
+        if (toAddFromDb.size() != mod.getToAdd().size()) { //nel frattempo qualcuno è stato prenotato
+            List<Seat> availableLeft = toAddFromDb.stream().map(SeatsAndReservation::getSeat).collect(Collectors.toList());
+            throw new SeatsAlreadyBookedException(availableLeft);
+        }
+        List<SeatsAndReservation> toRemove = seatInReservationRepository.findAllByRoute_IdAndReservation_IdAndSeat_IdIn(r.getBookedRoute().getId(), r.getId(), mod.getToRemove().stream().map(Seat::getId).collect(Collectors.toList()));
+        toAddFromDb.forEach(seat -> seat.setReservation(r));
+        toRemove.forEach(seat -> seat.setReservation(null));
+        return r;
     }
 
 }

@@ -13,4 +13,6 @@ public interface SeatInReservationRepository extends JpaRepository<SeatsAndReser
 
 
     List<SeatsAndReservation> findAllByRoute_IdAndReservation_Id(Integer routeId, Integer resId);
+    List<SeatsAndReservation> findAllByRoute_IdAndReservation_IdAndSeat_IdIn(Integer routeId, Integer resId,List<Integer> seatIds);
+
 }

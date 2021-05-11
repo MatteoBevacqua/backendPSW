@@ -41,7 +41,5 @@ public class Reservation {
     private List<SeatsAndReservation> reserved_seats = new ArrayList<>();
 
 
-    @JsonIgnore
-    @Transient
-    List<Seat> seatsBooked;
+
 }

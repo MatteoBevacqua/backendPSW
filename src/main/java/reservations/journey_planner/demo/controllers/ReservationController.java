@@ -16,6 +16,7 @@ import reservations.journey_planner.demo.entities.Seat;
 import reservations.journey_planner.demo.exceptions.NoSuchReservationException;
 import reservations.journey_planner.demo.exceptions.ReservationAlreadyExists;
 import reservations.journey_planner.demo.exceptions.SeatsAlreadyBookedException;
+import reservations.journey_planner.demo.requestPOJOs.ModifiedBookingDTO;
 import reservations.journey_planner.demo.requestPOJOs.RouteAndSeats;
 import reservations.journey_planner.demo.services.ReservationService;
 import reservations.journey_planner.demo.services.SeatService;
@@ -40,6 +41,15 @@ public class ReservationController {
         return new ResponseEntity<>(reservationService.getReservationsByPassenger(p), HttpStatus.OK);
     }
 
+    @PutMapping
+    public ResponseEntity modifyReservation(@RequestBody ModifiedBookingDTO mod){
+        Passenger p = Utils.getPassengerFromToken(Utils.getPrincipal());
+        try {
+            return new ResponseEntity<>(reservationService.modifyReservation(p, mod), HttpStatus.OK);
+        }catch (SeatsAlreadyBookedException e){
+            return new ResponseEntity(e.getAvailableSeatsLeft(), HttpStatus.OK);
+        }
+    }
 
     @PostMapping("/new")
     public ResponseEntity addReservation(@RequestBody RouteAndSeats r) {
@@ -77,14 +87,6 @@ public class ReservationController {
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
-    /*
 
-    //TODO
-    @PreAuthorize("hasAuthority('passenger')")
-    @PostMapping("/new")
-    public void modifyReservation(@RequestBody Route r) {
-
-    }
-*/
 }
 

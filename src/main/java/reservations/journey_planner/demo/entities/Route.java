@@ -34,6 +34,7 @@ public class Route {
     @JoinColumn(name="DESTINATION_STATION")
     private TrainStation arrivalStation;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "route")
     private List<SeatsAndReservation> bookableSeats;
 
@@ -47,9 +48,5 @@ public class Route {
     @Column(name="route_length")
     private int routeLength;
 
-/*
-    @Version
-    private long version;
 
- */
 }

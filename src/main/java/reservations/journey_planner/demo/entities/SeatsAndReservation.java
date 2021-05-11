@@ -39,6 +39,7 @@ public class SeatsAndReservation {
     @JoinColumn(name = "ROUTE_ID")
     private Route route;
 
+    @JsonIgnore
     @Version
     @Column(name = "version", nullable = false)
     private long version;
