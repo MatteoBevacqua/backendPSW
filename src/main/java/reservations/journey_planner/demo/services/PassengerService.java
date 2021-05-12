@@ -1,5 +1,6 @@
 package reservations.journey_planner.demo.services;
 
+import lombok.NoArgsConstructor;
 import org.keycloak.*;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -7,6 +8,10 @@ import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +24,8 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import reservations.journey_planner.demo.requestPOJOs.PassengerDTO;
 
+
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.Collections;
 
 @Service
@@ -31,25 +36,24 @@ public class PassengerService {
     private String authServerUrl;
     @Value("${keycloak.realm}")
     private String realm;
-    @Value("${keycloak.clientId}")
+    @Value("${key_conf.clientid}")
     private String clientId;
-    @Value("${keycloak.adminUsername}")
+    @Value("${key_conf.adminusername}")
     private String adminUsername;
-    @Value("${keycloak.adminPassword}")
-    private String clientPassword;
+    @Value("${key_conf.adminpassword}")
+    private String adminPassword;
+    private Keycloak keycloak;
 
-    private String admin = "admin-cli";
-    private String clientId = "spring-boot";
-    private String clientSecret = "cf08a263-1431-4fa7-bc3c-d5eb2063616d";
-    private String adminPassword = "admin";
-    private Keycloak keycloak = KeycloakBuilder.builder()
-            .serverUrl("http://localhost:8180/auth")
-            .grantType(OAuth2Constants.PASSWORD)
-            .realm(realm)
-            .clientId(clientId)
-            .username("admin")
-            .password("password").build();
-
+    @EventListener(ApplicationReadyEvent.class)
+    public void establishConnectionToAuthServer() {
+        keycloak = KeycloakBuilder.builder()
+                .serverUrl(authServerUrl)
+                .grantType(OAuth2Constants.PASSWORD)
+                .realm(realm)
+                .clientId(clientId)
+                .username(adminUsername)
+                .password(adminPassword).build();
+    }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public Passenger addUser(PassengerDTO passengerDTO) {

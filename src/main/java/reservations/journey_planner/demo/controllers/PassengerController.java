@@ -11,18 +11,11 @@ import reservations.journey_planner.demo.services.PassengerService;
 @RestController
 @RequestMapping("/users")
 public class PassengerController {
-    @Autowired
-    private PassengerService passengerService;
+    @Autowired private PassengerService passengerService;
 
     @PostMapping
     public ResponseEntity<Passenger> addPassenger(@RequestBody PassengerDTO passengerDTO) {
         return new ResponseEntity<>(passengerService.addUser(passengerDTO), HttpStatus.OK);
     }
 
-
-    @GetMapping
-    public ResponseEntity getUsers() {
-        passengerService.createUser();
-        return new ResponseEntity(HttpStatus.OK);
-    }
 }

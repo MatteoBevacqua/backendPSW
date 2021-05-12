@@ -1,8 +1,11 @@
 package reservations.journey_planner.demo.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import reservations.journey_planner.demo.configuration.Utils;
 import reservations.journey_planner.demo.entities.*;
+import reservations.journey_planner.demo.exceptions.NoSuchPassengerException;
 import reservations.journey_planner.demo.exceptions.NoSuchReservationException;
 import reservations.journey_planner.demo.exceptions.ReservationAlreadyExists;
 import reservations.journey_planner.demo.exceptions.SeatsAlreadyBookedException;
@@ -30,18 +33,18 @@ public class ReservationService {
     @Autowired
     private SeatInReservationRepository seatInReservationRepository;
 
-    @Transactional(readOnly = true)
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
 
-    @Transactional(readOnly = false)
     public List<Reservation> getReservationsByPassenger(Passenger p) {
-        Passenger managed = passengerService.savePassengerIfNotExists(p);
+        Jwt jwt = Utils.getPrincipal();
+        String pId = Utils.getPassengerFromToken(jwt).getId();
+        Passenger managed = passengerRepository.findPassengerById(pId);
+        if (managed == null) throw new NoSuchPassengerException();
         return reservationRepository.findAllByPassenger(managed);
     }
 
-    @Transactional(readOnly = true)
     public Reservation getByPassengerIdAndRoute(String passId, Integer routeid) {
         return reservationRepository.findReservationByPassenger_IdAndBookedRoute_Id(passId, routeid);
     }
