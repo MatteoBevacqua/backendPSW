@@ -13,6 +13,7 @@ import reservations.journey_planner.demo.entities.Passenger;
 public class Utils {
 
     public static Jwt getPrincipal() {
+        System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 

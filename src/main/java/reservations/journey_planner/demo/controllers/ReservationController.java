@@ -36,7 +36,7 @@ public class ReservationController {
 
     @GetMapping("/all")
     public ResponseEntity<List<Reservation>> getAll() {
-        Jwt jwt = Utils.getPrincipal();
+        Jwt jwt =(Jwt) Utils.getPrincipal();
         Passenger p = Utils.getPassengerFromToken(jwt);
         return new ResponseEntity<>(reservationService.getReservationsByPassenger(p), HttpStatus.OK);
     }
