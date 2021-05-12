@@ -9,5 +9,7 @@ public interface PassengerRepository extends JpaRepository<Passenger,String> {
 
     Passenger findPassengerById(String id);
 
+    Passenger findPassengerByEmail(String email);
+
     boolean existsById(String id);
 }

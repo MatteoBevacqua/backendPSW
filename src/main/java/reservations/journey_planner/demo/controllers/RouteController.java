@@ -1,5 +1,6 @@
 package reservations.journey_planner.demo.controllers;
 
+import org.keycloak.KeycloakPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

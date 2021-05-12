@@ -49,6 +49,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/cities/**").permitAll()
+                .antMatchers("/users/**").permitAll()
                 .antMatchers("/reservations/**").permitAll().
                 antMatchers("/routes/**").permitAll().
                 antMatchers("/trains/**").permitAll().
