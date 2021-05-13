@@ -24,7 +24,6 @@ import reservations.journey_planner.demo.requestPOJOs.PassengerDTO;
 
 import javax.ws.rs.core.Response;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 @Service
 public class PassengerService {
@@ -62,7 +61,6 @@ public class PassengerService {
         RealmResource realmResource = keycloak.realm(realm);
         UsersResource usersResource = realmResource.users();
         RolesResource roles = realmResource.roles();
-        System.out.println(roles.list());
         UserRepresentation user = new UserRepresentation();
         user.setUsername(passengerDTO.getUsername());
         user.setFirstName(passengerDTO.getFirstName());
@@ -82,11 +80,11 @@ public class PassengerService {
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
         Passenger toAdd = passengerDTO.asPassenger();
         toAdd.setId(userId);
-        assignRoleToUser(userId,"passenger");
+        assignRoleToUser(userId);
         return passengerRepository.save(toAdd);
     }
 
-    private void assignRoleToUser(String userId, String role) {
+    private void assignRoleToUser(String userId) {
         UsersResource usersResource = keycloak.realm(realm).users();
         UserResource userResource = usersResource.get(userId);
         ClientRepresentation clientRepresentation = keycloak.realm(realm).clients().findByClientId("spring-boot").get(0);

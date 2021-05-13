@@ -21,6 +21,7 @@ import reservations.journey_planner.demo.entities.Route;
 import reservations.journey_planner.demo.repositories.CityRepository;
 import reservations.journey_planner.demo.repositories.RouteRepository;
 import com.mxgraph.util.mxCellRenderer;
+import reservations.journey_planner.demo.requestPOJOs.myGraphEdge;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageTypeSpecifier;
@@ -32,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -40,22 +42,34 @@ public class RouteService {
     private RouteRepository routeRepository;
     @Autowired
     private CityRepository cityRepository;
-    private  DirectedWeightedMultigraph<City, DefaultWeightedEdge> graph;
+    private DirectedWeightedMultigraph<City, myGraphEdge> graph;
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void constructGraph() {
         List<City> cities = cityRepository.findAll();
         List<Route> routes = routeRepository.findAll();
-        graph = new DirectedWeightedMultigraph<>(DefaultWeightedEdge.class);
+        graph = new DirectedWeightedMultigraph<>(myGraphEdge.class);
         cities.forEach(graph::addVertex);
-        DefaultWeightedEdge[] edges = new DefaultWeightedEdge[1];
+        myGraphEdge[] edges = new myGraphEdge[1];
         routes.forEach(route -> {
                     edges[0] = graph.addEdge(route.getDepartureStation().getCity(), route.getArrivalStation().getCity());
+                    edges[0].setRoute(route);
                     graph.setEdgeWeight(edges[0], route.getRouteLength());
                 }
         );
 
+    }
+
+    public List<Route> findByArrivalAndDepartureCity(String departureCity, String arrivalCity, boolean shortestPath) {
+        if (!shortestPath)
+            routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(departureCity, arrivalCity);
+        City from = cityRepository.findByName(departureCity);
+        City to = cityRepository.findByName(arrivalCity);
+        if (from == null || to == null)
+            throw new RuntimeException("No such city");
+        return DijkstraShortestPath.findPathBetween(graph, from, to).getEdgeList()
+                .stream().map(myGraphEdge::getRoute).collect(Collectors.toList());
     }
 
 
