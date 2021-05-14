@@ -16,7 +16,6 @@ import java.util.List;
 
 @Table(name = "TRAIN_STATION", schema = "journey_planner")
 public class TrainStation {
-    @JsonIgnore
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +27,6 @@ public class TrainStation {
 
     @ManyToOne
     @JoinColumn(name = "CITY")
-    @JsonIgnore
     private City city;
 
 

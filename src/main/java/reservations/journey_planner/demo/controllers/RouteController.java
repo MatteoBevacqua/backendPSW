@@ -41,8 +41,10 @@ public class RouteController {
     public ResponseEntity getByDepartureAndArrival(
             @RequestParam(name = "departure") String depCity,
             @RequestParam(name = "arrival") String arrCity,
-            @RequestParam(name = "shortest", required = false) boolean shortestPath) {
-        List<Route> routes = routeService.
+            @RequestParam(name = "shortest", required = false) Boolean shortestPath,
+            @RequestParam(name="seatsLeft",required = false) Integer seatsLeft) {
+        List<Route> routes = routeService.findByArrivalAndDepartureCity(depCity, arrCity, false);
+        return new ResponseEntity(routes, HttpStatus.OK);
     }
 
     @GetMapping("search/byArrivalCity")
