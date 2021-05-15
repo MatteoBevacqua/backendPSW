@@ -43,7 +43,7 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
     List<Route> findAllByArrivalStation_City_Name(String city);
     List<Route> findAllByArrivalStation_City_NameAndDepartureTimeBefore(String city,Date end);
     List<Route> findAllByArrivalStation_City_NameAndDepartureTimeAfter(String city,Date start);
-    List<Route> findAllByArrivalStation_CityAndDepartureTimeAfterAndDepartureTimeBefore(String city,Date after,Date before);
+    List<Route> findAllByArrivalStation_City_NameAndDepartureTimeAfterAndDepartureTimeBefore(String city,Date after,Date before);
 
     Route findRouteById(Integer id);
 

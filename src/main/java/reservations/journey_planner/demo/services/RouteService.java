@@ -135,7 +135,7 @@ public class RouteService {
         if (start == null && end == null)
             return routeRepository.findAllByArrivalStation_City_Name(cityName);
         if (start != null && end != null)
-            return routeRepository.findAllByArrivalStation_CityAndDepartureTimeAfterAndDepartureTimeBefore(cityName, start, end);
+            return routeRepository.findAllByArrivalStation_City_NameAndDepartureTimeAfterAndDepartureTimeBefore(cityName, start, end);
         if (start != null)
             return routeRepository.findAllByArrivalStation_City_NameAndDepartureTimeAfter(cityName, start);
         return routeRepository.findAllByArrivalStation_City_NameAndDepartureTimeBefore(cityName, end);
