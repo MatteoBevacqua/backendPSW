@@ -66,13 +66,11 @@ public class ReservationController {
             return new ResponseEntity<>(res, HttpStatus.NOT_ACCEPTABLE);
         } catch (SeatsAlreadyBookedException e) {
             System.out.println("Seats already booked");
-            e.getAvailableSeatsLeft().stream().map(s -> s.getId()).forEach(System.out::println);
             return new ResponseEntity<List<Seat>>(e.getAvailableSeatsLeft(), HttpStatus.OK);
-        }  /*  catch (Exception e) {
-
+        }  catch (Exception e) {
             System.out.println("Transation rolled back");
             return ResponseEntity.status(HttpStatus.OK).body("Some of the seats you were trying to book were already taken");
-        }*/
+        }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 

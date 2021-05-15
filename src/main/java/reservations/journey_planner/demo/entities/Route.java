@@ -50,5 +50,10 @@ public class Route {
     @Column(name="route_length")
     private int routeLength;
 
+    @Column(name="SEATS_LEFT")
+    private int seatsLeft;
+
+    @Version
+    private int version;
 
 }

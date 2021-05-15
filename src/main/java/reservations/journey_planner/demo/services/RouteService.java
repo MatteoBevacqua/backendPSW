@@ -125,9 +125,9 @@ public class RouteService {
         return routeRepository.findAllByDepartureStation_City_NameAndDepartureTimeAfter(cityName, end);
     }
 
-    @Transactional(readOnly = true)
+
     public List<Route> findByDepartureCityAndXSeatsLeft(String cityName, int seatsLeft) {
-        return routeRepository.findByDepartureStationNameAndXSeats(cityName, seatsLeft);
+        return routeRepository.findByDepartureStation_City_NameAndSeatsLeftIsGreaterThanEqual(cityName, seatsLeft);
     }
 
 
@@ -143,11 +143,11 @@ public class RouteService {
 
     public List<Route> findByArrivalCityAndXSeatsLeft(String cityName, int seatsLeft, Date start, Date end) {
         if (start == null && end == null)
-            return routeRepository.findByArrivalStationNameAndXSeats(cityName, seatsLeft);
+            return routeRepository.findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqual(cityName, seatsLeft);
         if (start != null && end != null)
-            return routeRepository.findByArrivalStationNameAndXSeatsInTimePeriod(cityName, seatsLeft, start, end);
+            return routeRepository.findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqualAndDepartureTimeIsBetween(cityName, seatsLeft, start, end);
         if (start != null)
-            return routeRepository.findByArrivalStationNameAndXSeatsAfter(cityName, seatsLeft, start);
-        return routeRepository.findByArrivalStationNameAndXSeatsBefore(cityName, seatsLeft, end);
+            return routeRepository.findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqualAndDepartureTimeAfter(cityName, seatsLeft, start);
+        return routeRepository.findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqualAndDepartureTimeBefore(cityName, seatsLeft, end);
     }
 }

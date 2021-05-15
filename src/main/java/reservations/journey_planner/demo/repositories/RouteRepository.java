@@ -11,20 +11,15 @@ import java.util.List;
 
 @Repository
 public interface RouteRepository extends JpaRepository<Route, Integer> {
-    @Query(value = "SELECT R.* FROM SEATS_PER_RESERVATION S,ACTIVE_ROUTES R,TRAIN_STATION T WHERE S.ROUTE_ID=R.ROUTE_ID AND R.SOURCE_STATION=T.ID AND T.CITY=?1 GROUP BY S.ROUTE_ID  HAVING COUNT(S.SEAT_ID)>?2", nativeQuery = true)
-    List<Route> findByDepartureStationNameAndXSeats(String cityName, int seatsLeft);
+    List<Route> findByDepartureStation_City_NameAndSeatsLeftIsGreaterThanEqual(String cityName, int seatsLeft);
 
-    @Query(value = "SELECT R.* FROM SEATS_PER_RESERVATION S,ACTIVE_ROUTES R,TRAIN_STATION T WHERE S.ROUTE_ID=R.ROUTE_ID AND R.DESTINATION_STATION=T.ID AND T.CITY=?1 GROUP BY S.ROUTE_ID  HAVING COUNT(S.SEAT_ID)>?2", nativeQuery = true)
-    List<Route> findByArrivalStationNameAndXSeats(String cityName, int seatsLeft);
+    List<Route> findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqual(String cityName, int seatsLeft);
 
-    @Query(value = "SELECT R.* FROM SEATS_PER_RESERVATION S,ACTIVE_ROUTES R,TRAIN_STATION T WHERE S.ROUTE_ID=R.ROUTE_ID AND R.DEPARTURE_TIME <=?3 AND R.ARRIVAL_TIME >=?4 AND  R.DESTINATION_STATION=T.ID AND T.CITY=?1 GROUP BY S.ROUTE_ID  HAVING COUNT(S.SEAT_ID)>?2", nativeQuery = true)
-    List<Route> findByArrivalStationNameAndXSeatsInTimePeriod(String name,Integer seats,Date low,Date up);
+    List<Route> findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqualAndDepartureTimeIsBetween(String name,Integer seats,Date low,Date up);
 
-    @Query(value = "SELECT R.* FROM SEATS_PER_RESERVATION S,ACTIVE_ROUTES R,TRAIN_STATION T WHERE S.ROUTE_ID=R.ROUTE_ID AND R.DEPARTURE_TIME <=?3  AND  R.DESTINATION_STATION=T.ID AND T.CITY=?1 GROUP BY S.ROUTE_ID  HAVING COUNT(S.SEAT_ID)>?2", nativeQuery = true)
-    List<Route> findByArrivalStationNameAndXSeatsBefore(String name,Integer seats,Date before);
+    List<Route> findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqualAndDepartureTimeAfter(String name,Integer seats,Date before);
 
-    @Query(value = "SELECT R.* FROM SEATS_PER_RESERVATION S,ACTIVE_ROUTES R,TRAIN_STATION T WHERE S.ROUTE_ID=R.ROUTE_ID AND R.DEPARTURE_TIME >=?3 AND  R.DESTINATION_STATION=T.ID AND T.CITY=?1 GROUP BY S.ROUTE_ID  HAVING COUNT(S.SEAT_ID)>?2", nativeQuery = true)
-    List<Route> findByArrivalStationNameAndXSeatsAfter(String name,Integer seats,Date after);
+    List<Route> findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqualAndDepartureTimeBefore(String name,Integer seats,Date after);
 
 
     List<Route> findAllByArrivalStation_City_NameOrDepartureStation_City_Name(String arrivalCityName, String departureCityName);

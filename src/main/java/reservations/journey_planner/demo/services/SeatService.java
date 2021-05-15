@@ -27,18 +27,20 @@ public class SeatService {
     @Autowired
     ReservationRepository reservationRepository;
 
-    @Transactional(readOnly = true)
+
     public List<Seat> findAll() {
         return seatRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
+
     public List<Seat> findAvailableByRoute(Route r) {
-        return seatRepository.findSeatsNative(r.getId());
+        return seatRepository.findSeatsNative(r.getId(),r.getTrain().getTrain_id());
     }
 
     @Transactional(readOnly = true)
     public List<Seat> findAvailableByRouteId(Integer id) {
-        return seatRepository.findSeatsNative(id);
+        Route r = routeRepository.findRouteById(id);
+        if(r == null) return null;
+        return seatRepository.findSeatsNative(id,r.getTrain().getTrain_id());
     }
 }

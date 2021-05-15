@@ -14,6 +14,7 @@ import reservations.journey_planner.demo.repositories.*;
 import org.springframework.transaction.annotation.Transactional;
 import reservations.journey_planner.demo.requestPOJOs.ModifiedBookingDTO;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,19 +56,35 @@ public class ReservationService {
         Route test = routeRepository.findRouteById(route.getId());
         if (reservationRepository.existsReservationsByPassenger_IdAndBookedRoute(passenger.getId(), test))
             throw new ReservationAlreadyExists();
-        List<SeatsAndReservation> inReservations = seatInReservationRepository.findAllBySeat_IdInAndRoute_IdAndReservationIsNull(seats.stream().map(Seat::getId).collect(Collectors.toList()), route.getId());
-        inReservations.forEach(res -> System.out.println(res.getSeat() + " " + res.getReservation()));
-        if (inReservations.size() != seats.size()) { //qualcuno potrebbe essere stato prenotato
-            List<Seat> availableLeft = inReservations.stream().map(SeatsAndReservation::getSeat).collect(Collectors.toList());
-            throw new SeatsAlreadyBookedException(availableLeft);
-        }
-        Reservation r = new Reservation();
+        List<Seat> availableForRoute = seatRepository.findSeatsNative(test.getId(),test.getTrain().getTrain_id());
+        System.out.println(test.getId()+ " " + test.getTrain().getTrain_id());
+        System.out.println(availableForRoute.size() + " av ");
+        System.out.println(test.getSeatsLeft());
+        if (test.getSeatsLeft() < seats.size())
+            throw new SeatsAlreadyBookedException(availableForRoute);
         List<Seat> fromDB = seatRepository.findByIdIn(seats.stream().map(Seat::getId).collect(Collectors.toList()));
-        freshP.setDistance_travelled(freshP.getDistance_travelled() + test.getRouteLength());
+        if (!availableForRoute.containsAll(fromDB))  //qualcuno potrebbe essere stato prenotato
+            throw new SeatsAlreadyBookedException(availableForRoute);
+        System.out.println("heeeerrr");
+        test.setSeatsLeft(test.getSeatsLeft() - seats.size()); //  "lock"
+        routeRepository.save(test); //a mo' di barriera
+        Reservation r = new Reservation();
+   //     freshP.setDistance_travelled(freshP.getDistance_travelled() + test.getRouteLength());
         r.setBookedRoute(test);
         r.setPassenger(freshP);
-        r.setReserved_seats(inReservations);
-        inReservations.forEach(seatAndRes -> seatAndRes.setReservation(r));
+        SeatsAndReservation[] res = new SeatsAndReservation[1];
+        Iterator<Seat> it = seats.iterator();
+        List<SeatsAndReservation> reserv = fromDB.stream().map(
+                seat -> {
+                    res[0] = new SeatsAndReservation();
+                    res[0].setRoute(test);
+                    res[0].setSeat(it.next());
+                    res[0].setReservation(r);
+                    return res[0];
+                }
+        ).collect(Collectors.toList());
+        reserv.forEach(seat -> seatInReservationRepository.save(seat));
+        r.setReserved_seats(reserv);
         return reservationRepository.save(r);
 
     }
