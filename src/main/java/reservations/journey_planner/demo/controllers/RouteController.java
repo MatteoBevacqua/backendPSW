@@ -1,7 +1,8 @@
 package reservations.journey_planner.demo.controllers;
 
-import org.keycloak.KeycloakPrincipal;
+import org.apache.james.mime4j.field.datetime.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import reservations.journey_planner.demo.entities.Route;
 import reservations.journey_planner.demo.services.RouteService;
 
+import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
 
 @RestController
@@ -42,8 +48,21 @@ public class RouteController {
             @RequestParam(name = "departure") String depCity,
             @RequestParam(name = "arrival") String arrCity,
             @RequestParam(name = "shortest", required = false) Boolean shortestPath,
-            @RequestParam(name="seatsLeft",required = false) Integer seatsLeft) {
-        List<Route> routes = routeService.findByArrivalAndDepartureCity(depCity, arrCity, false);
+            @RequestParam(name = "seatsLeft", required = false) Integer seatsLeft,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate) {
+        Date from = null, to = null;
+        if (startDate != null) {
+            TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(startDate + "Z");
+            Instant i = Instant.from(ta);
+            from = Date.from(i);
+        }
+        if (endDate != null) {
+            TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(endDate + "Z");
+            Instant i = Instant.from(ta);
+            to = Date.from(i);
+        }
+        List<Route> routes = routeService.findByArrivalAndDepartureCity(depCity, arrCity, false, from, to);
         return new ResponseEntity(routes, HttpStatus.OK);
     }
 

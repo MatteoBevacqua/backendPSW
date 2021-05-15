@@ -5,6 +5,7 @@ import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
+import org.apache.james.mime4j.field.datetime.DateTime;
 import org.jgrapht.GraphPath;
 import org.jgrapht.ListenableGraph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -32,7 +33,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 
@@ -61,9 +65,14 @@ public class RouteService {
 
     }
 
-    public List<Route> findByArrivalAndDepartureCity(String departureCity, String arrivalCity, boolean shortestPath) {
-        if (!shortestPath)
-            routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(departureCity, arrivalCity);
+    public List<Route> findByArrivalAndDepartureCity(String departureCity, String arrivalCity, boolean shortestPath, Date start, Date end) {
+        if (!shortestPath) {
+            if (start == null && end == null)
+                return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(departureCity, arrivalCity);
+            if (start != null)
+                return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfter(departureCity, arrivalCity, start);
+            return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(departureCity, arrivalCity, end);
+        }
         City from = cityRepository.findByName(departureCity);
         City to = cityRepository.findByName(arrivalCity);
         if (from == null || to == null)
@@ -85,7 +94,7 @@ public class RouteService {
 
     @Transactional(readOnly = true)
     public List<Route> findByDepartureCity(String cityName) {
-        return routeRepository.findAllByDepartureStation_City_Name(cityName);
+        return routeRepository.findAllByDepartureStation_City_Name(cityName.toLowerCase());
     }
 
     @Transactional(readOnly = true)

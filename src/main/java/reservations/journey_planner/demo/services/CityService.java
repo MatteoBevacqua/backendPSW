@@ -16,11 +16,13 @@ public class CityService {
         return cityRepository.findAll();
     }
 
+    public List<City> getByNameLike(String name) {
+        return cityRepository.getAllByNameContains(name);
+    }
+
     public List<City> findByName(String name) {
-        try {
-            return cityRepository.findAllByName(name);
-        } catch (Exception e) {
-            return null;
-        }
+
+        return cityRepository.findAllByName(name);
+
     }
 }

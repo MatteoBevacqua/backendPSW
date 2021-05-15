@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import reservations.journey_planner.demo.entities.Route;
 
+
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -19,9 +21,13 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
 
     List<Route> findAllByDepartureStation_City_Name(String city);
 
+    List<Route> findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfter(String dep, String arr, Date start);
+
+    List<Route> findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(String dep, String arr, Date end);
+
     List<Route> findAllByArrivalStation_City_Name(String city);
 
     Route findRouteById(Integer id);
 
-    List<Route> findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(String depCity,String arrCity);
+    List<Route> findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(String depCity, String arrCity);
 }
