@@ -9,15 +9,38 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import reservations.journey_planner.demo.entities.Passenger;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.Date;
+
 @UtilityClass
 public class Utils {
+
+    public static Date[] converter(String startDate, String endDate) {
+        Date from = null, to = null;
+        TemporalAccessor ta;
+        Instant i;
+        if (startDate != null) {
+            ta = DateTimeFormatter.ISO_INSTANT.parse(startDate + "Z");
+            i = Instant.from(ta);
+            from = Date.from(i);
+        }
+        if (endDate != null) {
+            ta = DateTimeFormatter.ISO_INSTANT.parse(endDate + "Z");
+            i = Instant.from(ta);
+            to = Date.from(i);
+        }
+        return new Date[]{from, to};
+    }
+
 
     public static Jwt getPrincipal() {
         System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    public static Passenger getPassengerFromToken(Jwt jwt){
+    public static Passenger getPassengerFromToken(Jwt jwt) {
         Passenger p = new Passenger();
         p.setEmail(getEmail(jwt));
         p.setName(getName(jwt));
@@ -25,6 +48,7 @@ public class Utils {
         p.setId(jwt.getSubject());
         return p;
     }
+
     public static String getAuthServerId(Jwt jwt) {
         return getTokenNode(jwt).get("subject").asText();
     }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reservations.journey_planner.demo.configuration.Utils;
 import reservations.journey_planner.demo.entities.Route;
 import reservations.journey_planner.demo.services.RouteService;
 
@@ -22,24 +23,25 @@ import java.util.List;
 @RestController
 @RequestMapping("/routes")
 public class RouteController {
-    @Autowired
-    RouteService routeService;
+    @Autowired RouteService routeService;
 
     @GetMapping("/all")
     public ResponseEntity<List<Route>> getAll() {
         return new ResponseEntity<>(routeService.findAll(), HttpStatus.OK);
     }
 
-    @GetMapping("search/byCity")
-    public ResponseEntity<List<Route>> getByCity(@RequestParam(name = "city") String cityName) {
-        return new ResponseEntity<>(routeService.findByArrivalCity(cityName), HttpStatus.OK);
-    }
 
     @GetMapping("search/byDepartureCity")
-    public ResponseEntity<List<Route>> getByDepartureCity(@RequestParam(name = "city") String cityName, @RequestParam(value = "seatsLeft", required = false) Integer seatsLeft) {
+    public ResponseEntity<List<Route>> getByDepartureCity(@RequestParam(name = "city") String cityName,
+                                                          @RequestParam(value = "seatsLeft", required = false) Integer seatsLeft,
+                                                          @RequestParam(name = "startDate", required = false) String startDate,
+                                                          @RequestParam(name = "endDate", required = false) String endDate) {
+        Date[] dates = Utils.converter(startDate, endDate);
+        Date start = dates[0];
+        Date end = dates[1];
         if (seatsLeft == null)
-            return new ResponseEntity<>(routeService.findByDepartureCity(cityName), HttpStatus.OK);
-        return new ResponseEntity<>(routeService.findByArrivalCityAndXSeatsLeft(cityName, seatsLeft), HttpStatus.OK);
+            return new ResponseEntity<>(routeService.findByDepartureCity(cityName, start, end), HttpStatus.OK);
+        return new ResponseEntity<>(routeService.findByDepartureCityAndXSeatsLeft(cityName, seatsLeft), HttpStatus.OK);
 
     }
 
@@ -51,28 +53,25 @@ public class RouteController {
             @RequestParam(name = "seatsLeft", required = false) Integer seatsLeft,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate) {
-        Date from = null, to = null;
-        TemporalAccessor ta;
-        Instant i;
-        if (startDate != null) {
-            ta = DateTimeFormatter.ISO_INSTANT.parse(startDate + "Z");
-            i = Instant.from(ta);
-            from = Date.from(i);
-        }
-        if (endDate != null) {
-            ta = DateTimeFormatter.ISO_INSTANT.parse(endDate + "Z");
-            i = Instant.from(ta);
-            to = Date.from(i);
-        }
+        Date[] dates = Utils.converter(startDate, endDate);
+        Date from = dates[0];
+        Date to = dates[1];
         List<Route> routes = routeService.findByArrivalAndDepartureCity(depCity, arrCity, false, from, to);
         return new ResponseEntity(routes, HttpStatus.OK);
     }
 
     @GetMapping("search/byArrivalCity")
-    public ResponseEntity<List<Route>> getByArrivalCity(@RequestParam(name = "city") String cityName, @RequestParam(value = "seatsLeft", required = false) Integer seatsLeft) {
+    public ResponseEntity<List<Route>> getByArrivalCity(
+            @RequestParam(name = "city") String cityName,
+            @RequestParam(value = "seatsLeft", required = false) Integer seatsLeft,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate) {
+        Date[] dates = Utils.converter(startDate, endDate);
+        Date start = dates[0];
+        Date end = dates[1];
         if (seatsLeft == null)
-            return new ResponseEntity<>(routeService.findByArrivalCity(cityName), HttpStatus.OK);
-        return new ResponseEntity<>(routeService.findByArrivalCityAndXSeatsLeft(cityName, seatsLeft), HttpStatus.OK);
+            return new ResponseEntity<>(routeService.findByArrivalCity(cityName,start,end), HttpStatus.OK);
+        return new ResponseEntity<>(routeService.findByArrivalCityAndXSeatsLeft(cityName, seatsLeft, start, end), HttpStatus.OK);
     }
 
 
