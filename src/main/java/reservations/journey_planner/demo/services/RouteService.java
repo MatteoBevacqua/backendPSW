@@ -130,7 +130,7 @@ public class RouteService {
         return routeRepository.findByDepartureStationNameAndXSeats(cityName, seatsLeft);
     }
 
-    @Transactional(readOnly = true)
+
     public List<Route> findByArrivalCity(String cityName, Date start, Date end) {
         if (start == null && end == null)
             return routeRepository.findAllByArrivalStation_City_Name(cityName);
@@ -141,7 +141,6 @@ public class RouteService {
         return routeRepository.findAllByArrivalStation_City_NameAndDepartureTimeBefore(cityName, end);
     }
 
-    @Transactional(readOnly = true)
     public List<Route> findByArrivalCityAndXSeatsLeft(String cityName, int seatsLeft, Date start, Date end) {
         if (start == null && end == null)
             return routeRepository.findByArrivalStationNameAndXSeats(cityName, seatsLeft);
