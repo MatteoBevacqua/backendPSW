@@ -71,7 +71,10 @@ public class RouteService {
                 return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(departureCity, arrivalCity);
             if (start != null)
                 return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfter(departureCity, arrivalCity, start);
-            return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(departureCity, arrivalCity, end);
+            System.out.println(end);
+            List<Route> bef = routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(departureCity, arrivalCity, end);
+            bef.forEach(route -> System.out.println(route.getDepartureTime().before(end)));
+            return bef;
         }
         City from = cityRepository.findByName(departureCity);
         City to = cityRepository.findByName(arrivalCity);

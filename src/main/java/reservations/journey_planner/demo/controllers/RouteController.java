@@ -52,14 +52,16 @@ public class RouteController {
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate) {
         Date from = null, to = null;
+        TemporalAccessor ta;
+        Instant i;
         if (startDate != null) {
-            TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(startDate + "Z");
-            Instant i = Instant.from(ta);
+            ta = DateTimeFormatter.ISO_INSTANT.parse(startDate + "Z");
+            i = Instant.from(ta);
             from = Date.from(i);
         }
         if (endDate != null) {
-            TemporalAccessor ta = DateTimeFormatter.ISO_INSTANT.parse(endDate + "Z");
-            Instant i = Instant.from(ta);
+            ta = DateTimeFormatter.ISO_INSTANT.parse(endDate + "Z");
+            i = Instant.from(ta);
             to = Date.from(i);
         }
         List<Route> routes = routeService.findByArrivalAndDepartureCity(depCity, arrCity, false, from, to);
