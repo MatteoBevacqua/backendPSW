@@ -1,6 +1,7 @@
 package reservations.journey_planner.demo.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,13 +18,13 @@ import java.util.List;
 public class Train {
     @Id
     @Column(name = "TRAIN_ID")
-    private int train_id;
+    private int id;
 
 
     @Column(name = "type")
     private String type;
 
-
+    @JsonIgnore
     @OneToMany(mappedBy = "train")
     private List<Seat> seats;
 

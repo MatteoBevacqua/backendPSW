@@ -1,11 +1,15 @@
 package reservations.journey_planner.demo.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 import reservations.journey_planner.demo.entities.Route;
 
 
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.util.Date;
 import java.util.List;
 

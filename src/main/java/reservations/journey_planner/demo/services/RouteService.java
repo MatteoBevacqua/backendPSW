@@ -26,6 +26,7 @@ import reservations.journey_planner.demo.requestPOJOs.myGraphEdge;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageTypeSpecifier;
+import javax.persistence.EntityManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -47,7 +48,8 @@ public class RouteService {
     private RouteRepository routeRepository;
     @Autowired
     private CityRepository cityRepository;
-
+    @Autowired
+    EntityManager entityManager;
     private DirectedWeightedMultigraph<City, myGraphEdge> graph;
 
     @EventListener(ApplicationReadyEvent.class)
@@ -55,6 +57,8 @@ public class RouteService {
     public void constructGraph() {
         List<City> cities = cityRepository.findAll();
         List<Route> routes = routeRepository.findAllByDepartureTimeAfter(Date.from(Instant.now()));
+        cities.forEach(c -> entityManager.detach(c));
+        routes.forEach(r -> entityManager.detach(r));
         graph = new DirectedWeightedMultigraph<>(myGraphEdge.class);
         cities.forEach(graph::addVertex);
         myGraphEdge[] edges = new myGraphEdge[1];

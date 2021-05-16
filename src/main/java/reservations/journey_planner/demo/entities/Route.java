@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -23,7 +21,6 @@ public class Route {
     private int id;
 
     @ToString.Exclude
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="TRAIN_ID")
     private Train train;
@@ -53,7 +50,6 @@ public class Route {
     @Column(name="SEATS_LEFT")
     private int seatsLeft;
 
-    @Version
-    private int version;
+
 
 }

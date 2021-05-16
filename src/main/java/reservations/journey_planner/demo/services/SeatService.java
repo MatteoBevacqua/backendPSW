@@ -34,13 +34,13 @@ public class SeatService {
 
 
     public List<Seat> findAvailableByRoute(Route r) {
-        return seatRepository.findSeatsNative(r.getId(),r.getTrain().getTrain_id());
+        return seatRepository.findSeatsNative(r.getId());
     }
 
     @Transactional(readOnly = true)
     public List<Seat> findAvailableByRouteId(Integer id) {
         Route r = routeRepository.findRouteById(id);
         if(r == null) return null;
-        return seatRepository.findSeatsNative(id,r.getTrain().getTrain_id());
+        return seatRepository.findSeatsNative(id);
     }
 }

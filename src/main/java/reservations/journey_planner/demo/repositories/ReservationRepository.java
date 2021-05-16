@@ -15,7 +15,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     List<Reservation> findAllByPassenger(Passenger p);
 
-    boolean existsReservationsByPassenger_IdAndBookedRoute(String id, Route r);
+    boolean existsReservationsByPassenger_IdAndBookedRoute_Id(String id, Integer r);
 
     List<Reservation> findAllReservationsByPassenger_IdAndBookedRoute(String id, Route r);
 
