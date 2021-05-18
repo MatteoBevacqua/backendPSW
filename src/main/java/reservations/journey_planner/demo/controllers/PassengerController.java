@@ -17,12 +17,15 @@ public class PassengerController {
 
     @PostMapping
     public ResponseEntity addPassenger(@RequestBody PassengerDTO passengerDTO) {
+        System.out.println(passengerDTO);
         Passenger p;
         try {
             p = passengerService.addUser(passengerDTO);
         } catch (EmailAlreadyInUseException e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.OK).body("The supplied email is already in use");
         } catch (RuntimeException e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.OK).body("Failed to reach auth server,try again later");
         }
         return new ResponseEntity<>(p, HttpStatus.OK);

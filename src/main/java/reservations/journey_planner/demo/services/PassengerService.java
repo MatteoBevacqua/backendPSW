@@ -62,7 +62,6 @@ public class PassengerService {
         UsersResource usersResource = realmResource.users();
         RolesResource roles = realmResource.roles();
         UserRepresentation user = new UserRepresentation();
-        user.setUsername(passengerDTO.getUsername());
         user.setFirstName(passengerDTO.getFirstName());
         user.setLastName(passengerDTO.getLastName());
         user.setEmail(passengerDTO.getEmail());
@@ -75,8 +74,11 @@ public class PassengerService {
         passwordCred.setValue(passengerDTO.getPassword());
         user.setCredentials(Collections.singletonList(passwordCred));
         Response response = usersResource.create(user);
-        if (response.getStatus() != 201)
+        System.out.println(response.getStatus());
+        if (response.getStatus() != 201) {
+            System.out.println(response);
             throw new RuntimeException("Unexpected error");
+        }
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
         Passenger toAdd = passengerDTO.asPassenger();
         toAdd.setId(userId);

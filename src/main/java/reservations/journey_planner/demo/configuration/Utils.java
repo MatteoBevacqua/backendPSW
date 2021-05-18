@@ -39,7 +39,7 @@ public class Utils {
         Passenger p = new Passenger();
         p.setEmail(getEmail(jwt));
         p.setName(getName(jwt));
-        p.setSecond_name(getSecondName(jwt));
+        p.setSecondName(getSecondName(jwt));
         p.setId(jwt.getSubject());
         return p;
     }

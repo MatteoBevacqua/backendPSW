@@ -23,13 +23,16 @@ public class Passenger {
     private String name;
 
     @Column(name = "SECOND_NAME")
-    private String second_name;
+    private String secondName;
 
     @Column(name="email")
     private String email;
 
     @Column(name = "TOTAL_DISTANCE_TRAVELLED")
-    private long distance_travelled;
+    private long distanceTravelled;
+
+    @Column(name="TELEPHONE_NUMBER")
+    private String telephoneNumber;
 
     @JsonIgnore
     @Cascade(org.hibernate.annotations.CascadeType.ALL)

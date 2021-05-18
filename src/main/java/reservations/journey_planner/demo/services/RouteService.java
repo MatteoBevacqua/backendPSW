@@ -62,8 +62,8 @@ public class RouteService {
 
     @Transactional(readOnly = true)
     List<Route> findShortestPath(List<Route> routes, City from, City to) {
-        City[] first = new City[2];
-        myGraphEdge[] edge = new myGraphEdge[1];
+        final City[] first = new City[2];
+        final myGraphEdge[] edge = new myGraphEdge[1];
         DirectedWeightedMultigraph<City, myGraphEdge> myGraph = new DirectedWeightedMultigraph<>(myGraphEdge.class);
         myGraph.addVertex(from);
         myGraph.addVertex(to);
@@ -88,10 +88,6 @@ public class RouteService {
         return routeRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
-    public List<Route> findByCityBothDepartureAndArrival(String cityName) {
-        return routeRepository.findAllByArrivalStation_City_NameOrDepartureStation_City_Name(cityName, cityName);
-    }
 
     @Transactional(readOnly = true)
     public List<Route> findByDepartureCity(String cityName, Date start, Date end) {

@@ -13,6 +13,7 @@ public class PassengerDTO {
     private String email;
     private String firstName;
     private String lastName;
+    private String telephoneNumber;
     private String username;
     private String password;
 
@@ -20,12 +21,12 @@ public class PassengerDTO {
         Passenger p = new Passenger();
         p.setEmail(email);
         p.setName(firstName);
-        p.setSecond_name(lastName);
+        p.setSecondName(lastName);
+        p.setTelephoneNumber(telephoneNumber);
         return p;
     }
 
     public boolean isValid() {
-        return firstName != null && lastName != null && email != null && password != null &&
-                username != null;
+        return firstName != null && lastName != null && email != null && password != null;
     }
 }
