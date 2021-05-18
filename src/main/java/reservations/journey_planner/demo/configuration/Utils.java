@@ -17,21 +17,16 @@ import java.util.Date;
 @UtilityClass
 public class Utils {
 
-    public static Date[] converter(String startDate, String endDate) {
-        Date from = null, to = null;
-        TemporalAccessor ta;
-        Instant i;
-        if (startDate != null) {
-            ta = DateTimeFormatter.ISO_INSTANT.parse(startDate + "Z");
-            i = Instant.from(ta);
-            from = Date.from(i);
+    public static Date[] converter(String... dates) {
+        Date[] date = new Date[dates.length];
+        TemporalAccessor temporalAccessor;
+        Instant instant;
+        for (int i = 0; i < date.length; i++) {
+            temporalAccessor = DateTimeFormatter.ISO_INSTANT.parse(dates[i] + "Z");
+            instant = Instant.from(temporalAccessor);
+            date[i] = Date.from(instant);
         }
-        if (endDate != null) {
-            ta = DateTimeFormatter.ISO_INSTANT.parse(endDate + "Z");
-            i = Instant.from(ta);
-            to = Date.from(i);
-        }
-        return new Date[]{from, to};
+        return date;
     }
 
 

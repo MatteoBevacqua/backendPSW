@@ -18,6 +18,8 @@ public interface SeatRepository extends JpaRepository<Seat, Integer> {
     @Query(value = "SELECT SEAT.* FROM SEAT,ACTIVE_ROUTES R WHERE R.ROUTE_ID = ?1 AND SEAT.TRAIN_ID = R.TRAIN_ID  AND SEAT.ID NOT IN (SELECT SEAT_ID FROM SEATS_PER_RESERVATION WHERE ROUTE_ID=?1)", nativeQuery = true)
     List<Seat> findSeatsNative(Integer route);
 
+    @Query(value = "SELECT SEAT.* FROM SEAT,ACTIVE_ROUTES R WHERE R.ROUTE_ID = ?1 AND SEAT.TRAIN_ID = R.TRAIN_ID  AND SEAT.ID  IN (SELECT SEAT_ID FROM SEATS_PER_RESERVATION WHERE ROUTE_ID=?1)", nativeQuery = true)
+    List<Seat> findNotAvailable(Integer routeID);
 
     List<Seat> findByIdIn(List<Integer> ids);
 

@@ -1,44 +1,20 @@
 package reservations.journey_planner.demo.services;
 
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.layout.mxCircleLayout;
-import com.mxgraph.layout.mxIGraphLayout;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
-import org.apache.james.mime4j.field.datetime.DateTime;
 import org.jgrapht.GraphPath;
-import org.jgrapht.ListenableGraph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.ext.JGraphXAdapter;
-import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.DirectedWeightedMultigraph;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reservations.journey_planner.demo.entities.City;
 import reservations.journey_planner.demo.entities.Route;
 import reservations.journey_planner.demo.repositories.CityRepository;
 import reservations.journey_planner.demo.repositories.RouteRepository;
-import com.mxgraph.util.mxCellRenderer;
 import reservations.journey_planner.demo.requestPOJOs.myGraphEdge;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageTypeSpecifier;
 import javax.persistence.EntityManager;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 
@@ -50,61 +26,60 @@ public class RouteService {
     private CityRepository cityRepository;
     @Autowired
     EntityManager entityManager;
-    private DirectedWeightedMultigraph<City, myGraphEdge> graph;
 
-    @EventListener(ApplicationReadyEvent.class)
-    @Transactional
-    public void constructGraph() {
-        List<City> cities = cityRepository.findAll();
-        List<Route> routes = routeRepository.findAllByDepartureTimeAfter(Date.from(Instant.now()));
-        cities.forEach(c -> entityManager.detach(c));
-        routes.forEach(r -> entityManager.detach(r));
-        graph = new DirectedWeightedMultigraph<>(myGraphEdge.class);
-        cities.forEach(graph::addVertex);
-        myGraphEdge[] edges = new myGraphEdge[1];
-        routes.forEach(route -> {
-                    edges[0] = graph.addEdge(route.getDepartureStation().getCity(), route.getArrivalStation().getCity());
-                    edges[0].setRoute(route);
-                    graph.setEdgeWeight(edges[0], route.getRouteLength());
-                }
-        );
+
+    public List<Route> findByArrivalAndDepartureCity(String departureCity, String arrivalCity, Date start, Date end) {
+        if (start == null && end == null)
+            return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(departureCity, arrivalCity);
+        if (start != null)
+            return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfter(departureCity, arrivalCity, start);
+        return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(departureCity, arrivalCity, end);
 
     }
 
-    public List<Route> findByArrivalAndDepartureCity(String departureCity, String arrivalCity, boolean shortestPath, Date start, Date end) {
-        if (!shortestPath) {
-            if (start == null && end == null)
-                return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(departureCity, arrivalCity);
-            if (start != null)
-                return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfter(departureCity, arrivalCity, start);
-            List<Route> bef = routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(departureCity, arrivalCity, end);
-            bef.forEach(route -> System.out.println(route.getDepartureTime().before(end)));
-            return bef;
-        }
+    public List<Route> findByArrivalAndDepartureCityAndXSeats(String departureCity, String arrivalCity, Date start, Date end, int seatsLeft) {
+
+        if (start == null && end == null)
+            return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndSeatsLeftGreaterThanEqual(departureCity, arrivalCity, seatsLeft);
+        if (start != null)
+            return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfterAndSeatsLeftGreaterThanEqual(departureCity, arrivalCity, start, seatsLeft);
+        return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(departureCity, arrivalCity, end);
+
+    }
+
+    public List<Route> shortestPathInADay(String departureCity, String arrivalCity, Date day, Integer seatsLeft) {
         City from = cityRepository.findByName(departureCity);
         City to = cityRepository.findByName(arrivalCity);
         if (from == null || to == null)
             throw new RuntimeException("No such city");
-        if (start == null && end == null)
-            return DijkstraShortestPath.findPathBetween(graph, from, to).getEdgeList()
-                    .stream().map(myGraphEdge::getRoute).collect(Collectors.toList());
         List<Route> routes;
+        if (seatsLeft == null)
+            routes = routeRepository.findAllByDepartureTimeSameDay(day);
+        else
+            routes = routeRepository.findAllByDepartureTimeSameDayAndXSeatsLeft(day, seatsLeft);
+        return findShortestPath(routes, from, to);
+    }
+
+    @Transactional(readOnly = true)
+    List<Route> findShortestPath(List<Route> routes, City from, City to) {
         City[] first = new City[2];
         myGraphEdge[] edge = new myGraphEdge[1];
-        if (start != null)
-            routes = routeRepository.findAllByDepartureTimeAfter(start);
-        else routes = routeRepository.findAllByDepartureTimeBefore(end);
         DirectedWeightedMultigraph<City, myGraphEdge> myGraph = new DirectedWeightedMultigraph<>(myGraphEdge.class);
+        myGraph.addVertex(from);
+        myGraph.addVertex(to);
         routes.forEach(
                 route -> {
                     myGraph.addVertex(first[0] = route.getDepartureStation().getCity());
                     myGraph.addVertex(first[1] = route.getArrivalStation().getCity());
                     edge[0] = myGraph.addEdge(first[0], first[1]);
+                    edge[0].setRoute(route);
                     myGraph.setEdgeWeight(edge[0], route.getRouteLength());
                 }
         );
-        return DijkstraShortestPath.findPathBetween(myGraph, from, to).getEdgeList().stream().map(myGraphEdge::getRoute).collect(Collectors.toList());
-
+        GraphPath<City, myGraphEdge> path = DijkstraShortestPath.findPathBetween(myGraph, from, to);
+        if (path != null)
+            return path.getEdgeList().stream().map(myGraphEdge::getRoute).collect(Collectors.toList());
+        return null;
     }
 
 

@@ -37,10 +37,14 @@ public class SeatService {
         return seatRepository.findSeatsNative(r.getId());
     }
 
+    public List<Seat> findUnavailableByRoute(Integer r) {
+        return seatRepository.findNotAvailable(r);
+    }
+
     @Transactional(readOnly = true)
     public List<Seat> findAvailableByRouteId(Integer id) {
         Route r = routeRepository.findRouteById(id);
-        if(r == null) return null;
+        if (r == null) return null;
         return seatRepository.findSeatsNative(id);
     }
 }

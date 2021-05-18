@@ -23,17 +23,17 @@ public class Seat {
     private int id;
 
     @Column(name = "WAGON_NUMBER")
-    private int wagon_number;
+    private int wagonNumber;
 
     @Column(name = "CLASS", columnDefinition = "ENUM('ECONOMY','BUSINESS','FIRST')")
     @Enumerated(EnumType.STRING)
     private SeatClass seatClass;
 
     @Column(name = "ADULT_PRICE")
-    private int adult_price;
+    private int adultPrice;
 
     @Column(name = "CHILDREN_PRICE")
-    private int children_price;
+    private int childrenPrice;
 
     @Column(name = "FACING_DIRECTION", columnDefinition = "ENUM('FACING_DIRECTION','OPPOSITE')")
     @Enumerated(EnumType.STRING)
@@ -49,6 +49,8 @@ public class Seat {
     @ToString.Exclude
     private List<SeatsAndReservation> reservations = new ArrayList<>();
 
+    @Transient
+    private boolean isBooked;
 
     @Override
     public String toString() {

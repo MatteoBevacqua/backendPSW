@@ -68,7 +68,6 @@ public class ReservationService {
         List<Seat> fromDB = seatRepository.findByIdIn(seats.stream().map(Seat::getId).collect(Collectors.toList()));
         if (!availableForRoute.containsAll(fromDB))
             throw new SeatsAlreadyBookedException(availableForRoute);
-        System.out.println("asd");
         Reservation r = new Reservation();
         System.out.println(route);
         Route DB = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
@@ -95,8 +94,8 @@ public class ReservationService {
         r.setBookedRoute(DB);
         r.setPassenger(freshP);
         r.setReserved_seats(managed);
-        Reservation ret = reservationRepository.save(r);
-        return ret;
+        return reservationRepository.save(r);
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
