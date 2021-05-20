@@ -1,6 +1,7 @@
 package reservations.journey_planner.demo.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,6 +51,7 @@ public class Seat {
     private List<SeatsAndReservation> reservations = new ArrayList<>();
 
     @Transient
+    @JsonProperty(value = "isBooked")
     private boolean isBooked;
 
     @Override

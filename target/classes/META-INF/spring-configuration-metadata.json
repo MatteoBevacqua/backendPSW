@@ -1,0 +1,21 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "key_conf.adminpassword",
+      "type": "java.lang.String",
+      "description": "Description for key_conf.adminpassword."
+    },
+    {
+      "name": "key_conf.adminusername",
+      "type": "java.lang.String",
+      "description": "Description for key_conf.adminusername."
+    },
+    {
+      "name": "key_conf.clientid",
+      "type": "java.lang.String",
+      "description": "Description for key_conf.clientid."
+    }
+  ],
+  "hints": []
+}
