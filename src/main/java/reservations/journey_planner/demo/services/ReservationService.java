@@ -90,10 +90,9 @@ public class ReservationService {
         List<SeatsAndReservation> managed =
                 reserv.stream().map(seat -> seatInReservationRepository.save(seat)).collect(Collectors.toList());
         freshP.setDistanceTravelled(freshP.getDistanceTravelled() + DB.getRouteLength());
-        r.setReserved_seats(managed);
+        r.setReservedSeats(managed);
         r.setBookedRoute(DB);
         r.setPassenger(freshP);
-        r.setReserved_seats(managed);
         return reservationRepository.save(r);
 
     }

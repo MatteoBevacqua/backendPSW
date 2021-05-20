@@ -33,12 +33,12 @@ public class Reservation {
 
     @Column(name = "reservation_booking_date",updatable = false)
     @CreationTimestamp
-    private Timestamp reservation_booking_date;
+    private Timestamp reservationBookingDate;
 
 
     //NESSUN CASCADE,NON VANNO ELIMINATI quanto viene eliminata la res
     @OneToMany(targetEntity = SeatsAndReservation.class,mappedBy = "reservation")
-    private List<SeatsAndReservation> reserved_seats = new ArrayList<>();
+    private List<SeatsAndReservation> reservedSeats = new ArrayList<>();
 
 
 
