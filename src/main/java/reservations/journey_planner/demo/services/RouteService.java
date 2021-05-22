@@ -28,6 +28,13 @@ public class RouteService {
     EntityManager entityManager;
 
 
+    public Integer seatsLeft(Integer routeID) {
+        Route r = routeRepository.findRouteById(routeID);
+        if (r != null)
+            return r.getSeatsLeft();
+        return null;
+    }
+
     public List<Route> findByArrivalAndDepartureCity(String departureCity, String arrivalCity, Date start, Date end) {
         if (start == null && end == null)
             return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(departureCity, arrivalCity);

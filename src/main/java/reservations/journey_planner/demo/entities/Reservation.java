@@ -36,8 +36,8 @@ public class Reservation {
     private Timestamp reservationBookingDate;
 
 
-    //NESSUN CASCADE,NON VANNO ELIMINATI quanto viene eliminata la res
-    @OneToMany(targetEntity = SeatsAndReservation.class,mappedBy = "reservation")
+
+    @OneToMany(targetEntity = SeatsAndReservation.class,mappedBy = "reservation",cascade = CascadeType.REMOVE,orphanRemoval = true)
     private List<SeatsAndReservation> reservedSeats = new ArrayList<>();
 
 

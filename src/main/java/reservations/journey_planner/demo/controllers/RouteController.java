@@ -27,6 +27,10 @@ public class RouteController {
         return new ResponseEntity<>(routeService.findAll(), HttpStatus.OK);
     }
 
+    @GetMapping("/seatsLeft")
+    public ResponseEntity<Integer> getSeatsLeft(@RequestParam("routeId") Integer routeId) {
+        return new ResponseEntity<>(routeService.seatsLeft(routeId), HttpStatus.OK);
+    }
 
     @GetMapping("search/byDepartureCity")
     public ResponseEntity<List<Route>> getByDepartureCity(
@@ -50,9 +54,12 @@ public class RouteController {
             @RequestParam(name = "seatsLeft", required = false) Integer seatsLeft,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate) {
-        Date[] dates = Utils.converter(startDate, endDate);
-        Date from = dates[0];
-        Date to = dates[1];
+        Date from= null, to = null;
+        if (startDate != null || endDate != null) {
+            Date[] dates = Utils.converter(startDate, endDate);
+            from = dates[0];
+            to = dates[1];
+        }
         List<Route> routes;
         if (seatsLeft == null)
             routes = routeService.findByArrivalAndDepartureCity(depCity, arrCity, from, to);

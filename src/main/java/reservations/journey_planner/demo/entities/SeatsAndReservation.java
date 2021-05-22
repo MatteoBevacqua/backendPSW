@@ -26,7 +26,6 @@ public class SeatsAndReservation {
     @ToString.Exclude
     @JsonIgnore
     @ManyToOne
-    @Nullable
     @JoinColumn(name = "RESERVATION_ID")
     private Reservation reservation;
 

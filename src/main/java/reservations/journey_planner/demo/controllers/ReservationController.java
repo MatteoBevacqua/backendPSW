@@ -39,7 +39,9 @@ public class ReservationController {
     public ResponseEntity<List<Reservation>> getAll() {
         Jwt jwt = (Jwt) Utils.getPrincipal();
         Passenger p = Utils.getPassengerFromToken(jwt);
-        return new ResponseEntity<>(reservationService.getReservationsByPassenger(p), HttpStatus.OK);
+        List<Reservation> reservations = reservationService.getReservationsByPassenger(p);
+        reservations.forEach(r -> r.getReservedSeats().forEach(resSeat -> resSeat.getSeat().setBooked(true)));
+        return new ResponseEntity<>(reservations, HttpStatus.OK);
     }
 
     @PutMapping
@@ -52,7 +54,7 @@ public class ReservationController {
         }
     }
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity addReservation(@RequestBody RouteAndSeats r) {
         Jwt jwt = Utils.getPrincipal();
         Passenger p = Utils.getPassengerFromToken(jwt);
@@ -64,25 +66,28 @@ public class ReservationController {
         } catch (ReservationAlreadyExists e) {
             System.out.println("already exists");
             res = reservationService.getByPassengerIdAndRoute(jwt.getSubject(), r.getRoute().getId());
+            //406
             return new ResponseEntity<>(res, HttpStatus.NOT_ACCEPTABLE);
         } catch (SeatsAlreadyBookedException e) {
             System.out.println("Seats already booked");
-            return new ResponseEntity<List<Seat>>(e.getAvailableSeatsLeft(), HttpStatus.OK);
+            //409
+            return new ResponseEntity<List<Seat>>(e.getAvailableSeatsLeft(), HttpStatus.CONFLICT);
         } catch (NoSuchPassengerException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No such passenger");
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Transation rolled back");
-            return ResponseEntity.status(HttpStatus.OK).body("Some of the seats you were trying to book were already taken");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Some of the seats you were trying to book were already taken");
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+
     @DeleteMapping
-    public ResponseEntity<String> delete(@RequestBody Reservation r) {
+    public ResponseEntity<String> delete(@RequestParam(name ="id") Integer id) {
         Passenger richiedente = Utils.getPassengerFromToken(Utils.getPrincipal());
         try {
-            reservationService.deleteReservation(r, richiedente);
+            reservationService.deleteReservation(id, richiedente);
         } catch (NoSuchReservationException e) {
             return new ResponseEntity<>("No such reservation found", HttpStatus.BAD_REQUEST);
         }

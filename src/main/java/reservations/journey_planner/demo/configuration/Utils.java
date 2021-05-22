@@ -21,18 +21,23 @@ public class Utils {
         Date[] date = new Date[dates.length];
         TemporalAccessor temporalAccessor;
         Instant instant;
-        for (int i = 0; i < date.length; i++) {
-            temporalAccessor = DateTimeFormatter.ISO_INSTANT.parse(dates[i] + "Z");
-            instant = Instant.from(temporalAccessor);
-            date[i] = Date.from(instant);
+        try {
+            for (int i = 0; i < date.length; i++) {
+                temporalAccessor = DateTimeFormatter.ISO_INSTANT.parse(dates[i] + "Z");
+                instant = Instant.from(temporalAccessor);
+                date[i] = Date.from(instant);
+            }
+        } catch (Exception e) {
+            return new Date[dates.length];
         }
         return date;
     }
 
 
     public static Jwt getPrincipal() {
-        System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        return (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(principal instanceof Jwt);
+        return (Jwt) principal;
     }
 
     public static Passenger getPassengerFromToken(Jwt jwt) {
