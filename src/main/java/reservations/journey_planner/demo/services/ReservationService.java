@@ -58,7 +58,6 @@ public class ReservationService {
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public Reservation addNewReservationIfPossible(Passenger passenger, Route route, List<Seat> seats) {
-
         Passenger freshP = passengerRepository.findPassengerById(passenger.getId());
         if (freshP == null)
             throw new NoSuchPassengerException();
@@ -69,21 +68,26 @@ public class ReservationService {
         if (!availableForRoute.containsAll(fromDB))
             throw new SeatsAlreadyBookedException(availableForRoute);
         Reservation r = new Reservation();
-        System.out.println(route);
         Route DB = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
         DB.setSeatsLeft(DB.getSeatsLeft() - fromDB.size());
         entityManager.persist(DB);
         entityManager.lock(DB, LockModeType.NONE);
         r.setPassenger(freshP);
         r.setBookedRoute(DB);
+        Seat[] prev = new Seat[1];
+        fromDB.forEach(seat -> {
+            prev[0] = seats.get(seats.indexOf(seat));
+            seat.setPricePaid(prev[0].getPricePaid());
+        });
         SeatsAndReservation[] res = new SeatsAndReservation[1];
         Iterator<Seat> it = fromDB.iterator();
         List<SeatsAndReservation> reserv = fromDB.stream().map(
                 seat -> {
                     res[0] = new SeatsAndReservation();
                     res[0].setRoute(DB);
-                    res[0].setSeat(it.next());
+                    res[0].setSeat(prev[0] = it.next());
                     res[0].setReservation(r);
+                    res[0].setPricePaid(prev[0].getPricePaid());
                     return res[0];
                 }
         ).collect(Collectors.toList());
@@ -102,10 +106,11 @@ public class ReservationService {
         Reservation res;
         if ((res = reservationRepository.findByIdAndPassenger_Id(id, p.getId())) == null)
             throw new NoSuchReservationException();
+        //nessun bisogno di eliminarli, il cascade fa da solo
         List<SeatsAndReservation> seats = seatInReservationRepository.findAllByRoute_IdAndReservation_Id(res.getBookedRoute().getId(), res.getId());
-        seats.forEach(seatInReservationRepository::delete);
+        // seats.forEach(seatInReservationRepository::delete);
         Route route;
-        entityManager.lock(route = res.getBookedRoute(), LockModeType.PESSIMISTIC_WRITE, timeout);
+        entityManager.lock(route = res.getBookedRoute(), LockModeType.PESSIMISTIC_WRITE);
         route.setSeatsLeft(route.getSeatsLeft() + seats.size());
         reservationRepository.delete(res);
     }
@@ -117,22 +122,25 @@ public class ReservationService {
             throw new NoSuchReservationException();
         List<Integer> toAddIds = mod.getToAdd().stream().map(Seat::getId).collect(Collectors.toList());
         List<SeatsAndReservation> bookedForRoute = seatInReservationRepository.findAllByRoute_IdAndSeatIdIn(mod.getToModify().getId(), toAddIds);
-        if (toAddIds.size() != 0)
+        if (bookedForRoute.size() != 0)
             throw new RuntimeException("Seats booked");
         List<SeatsAndReservation> toRemove = seatInReservationRepository.findAllByRoute_IdAndReservation_IdAndSeat_IdIn(r.getBookedRoute().getId(), r.getId(), mod.getToRemove().stream().map(Seat::getId).collect(Collectors.toList()));
         toRemove.forEach(savedSeat -> {
             seatInReservationRepository.delete(savedSeat);
             r.getReservedSeats().remove(savedSeat);
         });
+        final Optional<Seat> toAdd[] = new Optional[1];
         toAddIds.forEach(seatId -> {
             SeatsAndReservation seatsAndReservation = new SeatsAndReservation();
             seatsAndReservation.setReservation(r);
-            seatsAndReservation.setSeat(seatRepository.findById(seatId).get());
+            if ((toAdd[0] = seatRepository.findById(seatId)).isEmpty())
+                throw new RuntimeException("No such seat");
+            seatsAndReservation.setSeat(toAdd[0].get());
             seatsAndReservation.setRoute(r.getBookedRoute());
             seatInReservationRepository.save(seatsAndReservation);
             r.getReservedSeats().add(seatsAndReservation);
         });
-        entityManager.lock(r, LockModeType.PESSIMISTIC_WRITE);
+        entityManager.lock(r.getBookedRoute(), LockModeType.PESSIMISTIC_WRITE);
         r.getBookedRoute().setSeatsLeft(r.getBookedRoute().getSeatsLeft() - toRemove.size() + toAddIds.size());
         return r;
     }

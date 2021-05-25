@@ -23,6 +23,8 @@ import reservations.journey_planner.demo.services.ReservationService;
 import reservations.journey_planner.demo.services.SeatService;
 
 
+import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", exposedHeaders = "If-Match")
@@ -45,22 +47,26 @@ public class ReservationController {
     }
 
     @PutMapping
-    public ResponseEntity modifyReservation(@RequestBody ModifiedBookingDTO mod) {
+    public ResponseEntity modifyReservation(@RequestBody @Valid ModifiedBookingDTO mod) {
         Passenger p = Utils.getPassengerFromToken(Utils.getPrincipal());
+        System.out.println(mod);
         try {
             return new ResponseEntity<>(reservationService.modifyReservation(p, mod), HttpStatus.OK);
         } catch (SeatsAlreadyBookedException e) {
             return new ResponseEntity(e.getAvailableSeatsLeft(), HttpStatus.OK);
+        } catch ( RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Non existent seat specified");
         }
     }
 
     @PostMapping
-    public ResponseEntity addReservation(@RequestBody RouteAndSeats r) {
+    public ResponseEntity addReservation(@RequestBody @Valid RouteAndSeats r) {
         Jwt jwt = Utils.getPrincipal();
         Passenger p = Utils.getPassengerFromToken(jwt);
         Reservation res = null;
         Route toBook = r.getRoute();
         List<Seat> seatsToBook = r.getSeats();
+        System.out.println(r.getSeats());
         try {
             res = reservationService.addNewReservationIfPossible(p, toBook, seatsToBook);
         } catch (ReservationAlreadyExists e) {
@@ -84,7 +90,7 @@ public class ReservationController {
 
 
     @DeleteMapping
-    public ResponseEntity<String> delete(@RequestParam(name ="id") Integer id) {
+    public ResponseEntity<String> delete(@RequestParam(name = "id") Integer id) {
         Passenger richiedente = Utils.getPassengerFromToken(Utils.getPrincipal());
         try {
             reservationService.deleteReservation(id, richiedente);

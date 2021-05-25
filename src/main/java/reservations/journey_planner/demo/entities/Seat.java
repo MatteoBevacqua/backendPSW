@@ -10,6 +10,7 @@ import lombok.ToString;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 @Getter
@@ -54,10 +55,27 @@ public class Seat {
     @JsonProperty(value = "isBooked")
     private boolean isBooked;
 
+    @Transient
+    private int pricePaid;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Seat seat = (Seat) o;
+        return id == seat.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     @Override
     public String toString() {
         return "Seat{" +
                 "id=" + id +
+                ",\tpricePaid" + pricePaid+
                 '}';
     }
 }

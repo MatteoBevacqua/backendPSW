@@ -40,6 +40,7 @@ public class SeatsAndReservation {
     @JoinColumn(name = "ROUTE_ID")
     private Route route;
 
-
+    @Column(name="PRICE_PAID")
+    private int pricePaid;
 
 }
