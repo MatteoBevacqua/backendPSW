@@ -38,12 +38,13 @@ public class ReservationController {
     SeatService seatService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Reservation>> getAll() {
+    public ResponseEntity getAll() {
         Jwt jwt = (Jwt) Utils.getPrincipal();
         Passenger p = Utils.getPassengerFromToken(jwt);
         List<Reservation> reservations = reservationService.getReservationsByPassenger(p);
         reservations.forEach(r -> r.getReservedSeats().forEach(resSeat -> resSeat.getSeat().setBooked(true)));
         return new ResponseEntity<>(reservations, HttpStatus.OK);
+
     }
 
     @PutMapping
@@ -53,8 +54,9 @@ public class ReservationController {
         try {
             return new ResponseEntity<>(reservationService.modifyReservation(p, mod), HttpStatus.OK);
         } catch (SeatsAlreadyBookedException e) {
-            return new ResponseEntity(e.getAvailableSeatsLeft(), HttpStatus.OK);
-        } catch ( RuntimeException e) {
+            return new ResponseEntity(HttpStatus.CONFLICT);
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Non existent seat specified");
         }
     }
@@ -66,7 +68,6 @@ public class ReservationController {
         Reservation res = null;
         Route toBook = r.getRoute();
         List<Seat> seatsToBook = r.getSeats();
-        System.out.println(r.getSeats());
         try {
             res = reservationService.addNewReservationIfPossible(p, toBook, seatsToBook);
         } catch (ReservationAlreadyExists e) {

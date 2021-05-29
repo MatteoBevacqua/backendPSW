@@ -10,6 +10,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @ToString
 @Getter
@@ -29,7 +30,7 @@ public class SeatsAndReservation {
     @JoinColumn(name = "RESERVATION_ID")
     private Reservation reservation;
 
-    @ToString.Exclude
+
     @ManyToOne
     @JoinColumn(name = "SEAT_ID")
     private Seat seat;
@@ -43,4 +44,16 @@ public class SeatsAndReservation {
     @Column(name="PRICE_PAID")
     private int pricePaid;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SeatsAndReservation that = (SeatsAndReservation) o;
+        return this.seat.equals(that.seat);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.seat.getId();
+    }
 }

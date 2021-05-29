@@ -68,14 +68,14 @@ public class Seat {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return id;
     }
 
     @Override
     public String toString() {
         return "Seat{" +
                 "id=" + id +
-                ",\tpricePaid" + pricePaid+
+                ",\tpricePaid=" + pricePaid+
                 '}';
     }
 }

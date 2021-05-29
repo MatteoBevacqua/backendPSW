@@ -20,4 +20,8 @@ public class SeatsAlreadyBookedException extends RuntimeException {
         this.availableSeatsLeft = availableSeatsLeft;
 
     }
+
+    public SeatsAlreadyBookedException() {
+
+    }
 }

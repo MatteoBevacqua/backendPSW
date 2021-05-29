@@ -30,15 +30,13 @@ public class Reservation {
     @JoinColumn(name = "ROUTE")
     private Route bookedRoute;
 
-    @Column(name = "reservation_booking_date",updatable = false)
+    @Column(name = "reservation_booking_date", updatable = false)
     @CreationTimestamp
     private Timestamp reservationBookingDate;
 
 
-
-    @OneToMany(targetEntity = SeatsAndReservation.class,mappedBy = "reservation",cascade = CascadeType.REMOVE,orphanRemoval = true)
+    @OneToMany(targetEntity = SeatsAndReservation.class,cascade = {CascadeType.PERSIST,CascadeType.REMOVE}, mappedBy = "reservation", orphanRemoval = true)
     private List<SeatsAndReservation> reservedSeats = new ArrayList<>();
-
 
 
 }

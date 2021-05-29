@@ -22,6 +22,11 @@ public class RouteController {
     @Autowired
     RouteService routeService;
 
+    @GetMapping("/getById")
+    public ResponseEntity<Route> getRouteById(@RequestParam(name = "routeId") Integer routeId) {
+        return new ResponseEntity<>(routeService.getById(routeId),HttpStatus.OK);
+    }
+
     @GetMapping("/all")
     public ResponseEntity<List<Route>> getAll() {
         return new ResponseEntity<>(routeService.findAll(), HttpStatus.OK);
@@ -54,7 +59,7 @@ public class RouteController {
             @RequestParam(name = "seatsLeft", required = false) Integer seatsLeft,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate) {
-        Date from= null, to = null;
+        Date from = null, to = null;
         if (startDate != null || endDate != null) {
             Date[] dates = Utils.converter(startDate, endDate);
             from = dates[0];

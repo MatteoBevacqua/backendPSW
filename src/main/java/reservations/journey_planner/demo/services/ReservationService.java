@@ -106,12 +106,15 @@ public class ReservationService {
         Reservation res;
         if ((res = reservationRepository.findByIdAndPassenger_Id(id, p.getId())) == null)
             throw new NoSuchReservationException();
-        //nessun bisogno di eliminarli, il cascade fa da solo
         List<SeatsAndReservation> seats = seatInReservationRepository.findAllByRoute_IdAndReservation_Id(res.getBookedRoute().getId(), res.getId());
-        // seats.forEach(seatInReservationRepository::delete);
         Route route;
         entityManager.lock(route = res.getBookedRoute(), LockModeType.PESSIMISTIC_WRITE);
-        route.setSeatsLeft(route.getSeatsLeft() + seats.size());
+        System.out.println(res.getReservedSeats());
+        System.out.println();
+        System.out.println(seats);
+        System.out.println(route.getSeatsLeft());
+        route.setSeatsLeft(route.getSeatsLeft() + res.getReservedSeats().size());
+        System.out.println(route.getSeatsLeft());
         reservationRepository.delete(res);
     }
 
@@ -120,28 +123,42 @@ public class ReservationService {
         Reservation r;
         if ((r = reservationRepository.findByIdAndPassenger_Id(mod.getToModify().getId(), p.getId())) == null)
             throw new NoSuchReservationException();
-        List<Integer> toAddIds = mod.getToAdd().stream().map(Seat::getId).collect(Collectors.toList());
-        List<SeatsAndReservation> bookedForRoute = seatInReservationRepository.findAllByRoute_IdAndSeatIdIn(mod.getToModify().getId(), toAddIds);
-        if (bookedForRoute.size() != 0)
-            throw new RuntimeException("Seats booked");
+        List<Integer> idsToAdd = mod.getToAdd().stream().map(Seat::getId).collect(Collectors.toList());
+        List<SeatsAndReservation> alreadyBookedByRoute = seatInReservationRepository.findAllByRoute_IdAndSeatIdIn(r.getBookedRoute().getId(), idsToAdd);
+        System.out.println(idsToAdd);
+        System.out.println(alreadyBookedByRoute + "  b  ");
+        if (alreadyBookedByRoute.size() > 0) throw new SeatsAlreadyBookedException();
         List<SeatsAndReservation> toRemove = seatInReservationRepository.findAllByRoute_IdAndReservation_IdAndSeat_IdIn(r.getBookedRoute().getId(), r.getId(), mod.getToRemove().stream().map(Seat::getId).collect(Collectors.toList()));
-        toRemove.forEach(savedSeat -> {
-            seatInReservationRepository.delete(savedSeat);
-            r.getReservedSeats().remove(savedSeat);
+        List<SeatsAndReservation> inReservation = r.getReservedSeats();
+        toRemove.forEach(inReservation::remove);
+        mod.getChangePrice().forEach(seat -> {
+            Optional<SeatsAndReservation> s = inReservation.stream().filter(res -> res.getSeat().getId() == seat.getId()).findFirst();
+            if (s.isPresent()) {
+                Optional<Seat> allowedPrices = seatRepository.findById(s.get().getSeat().getId());
+                if (allowedPrices.isEmpty()) throw new RuntimeException("NO such seat");
+                Seat price = allowedPrices.get();
+                if (seat.getPricePaid() == price.getAdultPrice() || seat.getPricePaid() == price.getChildrenPrice())
+                    seatInReservationRepository.findBySeat_IdAndReservation_Id(seat.getId(), r.getId()).setPricePaid(seat.getPricePaid());
+                else throw new RuntimeException("Illegal price range!");
+            } else
+                throw new RuntimeException("Bad seat specified");
         });
-        final Optional<Seat> toAdd[] = new Optional[1];
-        toAddIds.forEach(seatId -> {
+        mod.getToAdd().forEach(seatToAdd -> {
+            if (alreadyBookedByRoute.stream().anyMatch(seat -> seat.getSeat().getId() == seatToAdd.getId()))
+                throw new RuntimeException("Unavailable seats");
             SeatsAndReservation seatsAndReservation = new SeatsAndReservation();
-            seatsAndReservation.setReservation(r);
-            if ((toAdd[0] = seatRepository.findById(seatId)).isEmpty())
+            Optional<Seat> toAdd;
+            if ((toAdd = seatRepository.findById(seatToAdd.getId())).isEmpty())
                 throw new RuntimeException("No such seat");
-            seatsAndReservation.setSeat(toAdd[0].get());
+            seatsAndReservation.setSeat(toAdd.get());
             seatsAndReservation.setRoute(r.getBookedRoute());
-            seatInReservationRepository.save(seatsAndReservation);
-            r.getReservedSeats().add(seatsAndReservation);
+            seatsAndReservation.setReservation(r);
+            seatsAndReservation.setPricePaid(seatToAdd.getPricePaid());
+            r.getReservedSeats().add(seatsAndReservation); //cascade persist automatico
         });
-        entityManager.lock(r.getBookedRoute(), LockModeType.PESSIMISTIC_WRITE);
-        r.getBookedRoute().setSeatsLeft(r.getBookedRoute().getSeatsLeft() - toRemove.size() + toAddIds.size());
+        Route booked = r.getBookedRoute();
+        entityManager.lock(booked, LockModeType.PESSIMISTIC_WRITE);
+        booked.setSeatsLeft(booked.getSeatsLeft() + toRemove.size() - mod.getToAdd().size());
         return r;
     }
 

@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Cascade;
+import lombok.ToString;
+
 
 import javax.persistence.*;
 import java.util.List;
@@ -35,8 +36,8 @@ public class Passenger {
     private String telephoneNumber;
 
     @JsonIgnore
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @OneToMany(mappedBy = "passenger")
+    @OneToMany(mappedBy = "passenger",cascade = CascadeType.REMOVE,orphanRemoval = true)
+    @ToString.Exclude
     private List<Reservation> reservations;
 
 }
