@@ -64,38 +64,29 @@ public class ReservationService {
         if (reservationRepository.existsReservationsByPassenger_IdAndBookedRoute_Id(passenger.getId(), route.getId()))
             throw new ReservationAlreadyExists();
         List<Seat> availableForRoute = seatRepository.findSeatsNative(route.getId());
-        List<Seat> fromDB = seatRepository.findByIdIn(seats.stream().map(Seat::getId).collect(Collectors.toList()));
-        if (!availableForRoute.containsAll(fromDB))
+        if (!availableForRoute.containsAll(seats))
             throw new SeatsAlreadyBookedException(availableForRoute);
         Reservation r = new Reservation();
-        Route DB = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
-        DB.setSeatsLeft(DB.getSeatsLeft() - fromDB.size());
-        entityManager.persist(DB);
-        entityManager.lock(DB, LockModeType.NONE);
+        Route routetoBook = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
+        routetoBook.setSeatsLeft(routetoBook.getSeatsLeft() - seats.size());
+        entityManager.persist(routetoBook);
+        entityManager.lock(routetoBook, LockModeType.NONE);
         r.setPassenger(freshP);
-        r.setBookedRoute(DB);
-        Seat[] prev = new Seat[1];
-        fromDB.forEach(seat -> {
-            prev[0] = seats.get(seats.indexOf(seat));
-            seat.setPricePaid(prev[0].getPricePaid());
-        });
-        SeatsAndReservation[] res = new SeatsAndReservation[1];
-        Iterator<Seat> it = fromDB.iterator();
-        List<SeatsAndReservation> reserv = fromDB.stream().map(
+        r.setBookedRoute(routetoBook);
+        seats.forEach(
                 seat -> {
-                    res[0] = new SeatsAndReservation();
-                    res[0].setRoute(DB);
-                    res[0].setSeat(prev[0] = it.next());
-                    res[0].setReservation(r);
-                    res[0].setPricePaid(prev[0].getPricePaid());
-                    return res[0];
+                    SeatsAndReservation seatToReserve = new SeatsAndReservation();
+                    seatToReserve.setRoute(routetoBook);
+                    Optional<Seat> seatFromDB = seatRepository.findById(seat.getId());
+                    if(seatFromDB.isEmpty()) throw new RuntimeException("No such seat");
+                    seatToReserve.setSeat(seatFromDB.get());
+                    seatToReserve.setReservation(r);
+                    seatToReserve.setPricePaid(seat.getPricePaid());
+                    r.getReservedSeats().add(seatToReserve); //salvato automaticamente
                 }
-        ).collect(Collectors.toList());
-        List<SeatsAndReservation> managed =
-                reserv.stream().map(seat -> seatInReservationRepository.save(seat)).collect(Collectors.toList());
-        freshP.setDistanceTravelled(freshP.getDistanceTravelled() + DB.getRouteLength());
-        r.setReservedSeats(managed);
-        r.setBookedRoute(DB);
+        );
+        freshP.setDistanceTravelled(freshP.getDistanceTravelled() + routetoBook.getRouteLength());
+        r.setBookedRoute(routetoBook);
         r.setPassenger(freshP);
         return reservationRepository.save(r);
 
@@ -109,12 +100,7 @@ public class ReservationService {
         List<SeatsAndReservation> seats = seatInReservationRepository.findAllByRoute_IdAndReservation_Id(res.getBookedRoute().getId(), res.getId());
         Route route;
         entityManager.lock(route = res.getBookedRoute(), LockModeType.PESSIMISTIC_WRITE);
-        System.out.println(res.getReservedSeats());
-        System.out.println();
-        System.out.println(seats);
-        System.out.println(route.getSeatsLeft());
         route.setSeatsLeft(route.getSeatsLeft() + res.getReservedSeats().size());
-        System.out.println(route.getSeatsLeft());
         reservationRepository.delete(res);
     }
 
@@ -135,7 +121,7 @@ public class ReservationService {
             Optional<SeatsAndReservation> s = inReservation.stream().filter(res -> res.getSeat().getId() == seat.getId()).findFirst();
             if (s.isPresent()) {
                 Optional<Seat> allowedPrices = seatRepository.findById(s.get().getSeat().getId());
-                if (allowedPrices.isEmpty()) throw new RuntimeException("NO such seat");
+                if (allowedPrices.isEmpty()) throw new RuntimeException("No such seat");
                 Seat price = allowedPrices.get();
                 if (seat.getPricePaid() == price.getAdultPrice() || seat.getPricePaid() == price.getChildrenPrice())
                     seatInReservationRepository.findBySeat_IdAndReservation_Id(seat.getId(), r.getId()).setPricePaid(seat.getPricePaid());
@@ -145,7 +131,7 @@ public class ReservationService {
         });
         mod.getToAdd().forEach(seatToAdd -> {
             if (alreadyBookedByRoute.stream().anyMatch(seat -> seat.getSeat().getId() == seatToAdd.getId()))
-                throw new RuntimeException("Unavailable seats");
+                throw new SeatsAlreadyBookedException();
             SeatsAndReservation seatsAndReservation = new SeatsAndReservation();
             Optional<Seat> toAdd;
             if ((toAdd = seatRepository.findById(seatToAdd.getId())).isEmpty())

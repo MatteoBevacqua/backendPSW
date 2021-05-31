@@ -78,11 +78,10 @@ public class ReservationController {
         } catch (SeatsAlreadyBookedException e) {
             System.out.println("Seats already booked");
             //409
-            return new ResponseEntity<List<Seat>>(e.getAvailableSeatsLeft(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (NoSuchPassengerException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No such passenger");
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Transation rolled back");
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Some of the seats you were trying to book were already taken");
         }
