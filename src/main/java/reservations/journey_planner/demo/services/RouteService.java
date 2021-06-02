@@ -58,40 +58,7 @@ public class RouteService {
 
     }
 
-    public List<Route> shortestPathInADay(String departureCity, String arrivalCity, Date day, Integer seatsLeft) {
-        City from = cityRepository.findByName(departureCity);
-        City to = cityRepository.findByName(arrivalCity);
-        if (from == null || to == null)
-            throw new RuntimeException("No such city");
-        List<Route> routes;
-        if (seatsLeft == null)
-            routes = routeRepository.findAllByDepartureTimeSameDay(day);
-        else
-            routes = routeRepository.findAllByDepartureTimeSameDayAndXSeatsLeft(day, seatsLeft);
-        return findShortestPath(routes, from, to);
-    }
 
-    @Transactional(readOnly = true)
-    List<Route> findShortestPath(List<Route> routes, City from, City to) {
-        final City[] first = new City[2];
-        final myGraphEdge[] edge = new myGraphEdge[1];
-        DirectedWeightedMultigraph<City, myGraphEdge> myGraph = new DirectedWeightedMultigraph<>(myGraphEdge.class);
-        myGraph.addVertex(from);
-        myGraph.addVertex(to);
-        routes.forEach(
-                route -> {
-                    myGraph.addVertex(first[0] = route.getDepartureStation().getCity());
-                    myGraph.addVertex(first[1] = route.getArrivalStation().getCity());
-                    edge[0] = myGraph.addEdge(first[0], first[1]);
-                    edge[0].setRoute(route);
-                    myGraph.setEdgeWeight(edge[0], route.getRouteLength());
-                }
-        );
-        GraphPath<City, myGraphEdge> path = DijkstraShortestPath.findPathBetween(myGraph, from, to);
-        if (path != null)
-            return path.getEdgeList().stream().map(myGraphEdge::getRoute).collect(Collectors.toList());
-        return null;
-    }
 
 
     @Transactional(readOnly = true)

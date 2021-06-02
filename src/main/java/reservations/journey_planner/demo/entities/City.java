@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.List;
 
@@ -27,10 +28,18 @@ public class City implements Serializable {
     @Column(name = "COUNTRY")
     private String country;
 
+    @Column(name="LATITUDE")
+    private float latitude;
 
+    @Column(name="LONGITUDE")
+    private float longitude;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "city")
     @JsonIgnore
     private transient List<TrainStation> trainStations;
+
+    public Point2D toPoint(){
+       return new Point2D.Double(latitude,longitude);
+    }
 }

@@ -24,9 +24,9 @@ import reservations.journey_planner.demo.services.SeatService;
 
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"all"})
 @CrossOrigin(origins = "*", allowedHeaders = "*", exposedHeaders = "If-Match")
 @RestController
 @PreAuthorize("hasAuthority('passenger')")

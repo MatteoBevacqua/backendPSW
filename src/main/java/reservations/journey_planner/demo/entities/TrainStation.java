@@ -40,4 +40,15 @@ public class TrainStation {
     @JsonIgnore
     private List<Route> departure;
 
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TrainStation that = (TrainStation) o;
+        return id == that.id;
+    }
 }

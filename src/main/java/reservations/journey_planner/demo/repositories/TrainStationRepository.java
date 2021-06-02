@@ -10,4 +10,5 @@ import java.util.List;
 public interface TrainStationRepository extends JpaRepository<TrainStation, Integer> {
 
     List<TrainStation> getTrainStationByCity_Name(String city);
+    TrainStation findByCity_Name(String city);
 }

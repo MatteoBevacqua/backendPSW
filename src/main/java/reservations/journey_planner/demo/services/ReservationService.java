@@ -30,8 +30,6 @@ public class ReservationService {
     @Autowired
     private PassengerRepository passengerRepository;
     @Autowired
-    private RouteRepository routeRepository;
-    @Autowired
     private SeatRepository seatRepository;
     @Autowired
     private SeatInReservationRepository seatInReservationRepository;
@@ -40,9 +38,6 @@ public class ReservationService {
     static Map<String, Object> timeout = Map.of("javax.persistence.lock.timeout", 2);
 
 
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll();
-    }
 
     public List<Reservation> getReservationsByPassenger(Passenger p) {
         Jwt jwt = Utils.getPrincipal();
@@ -72,7 +67,6 @@ public class ReservationService {
         entityManager.persist(routetoBook);
         entityManager.lock(routetoBook, LockModeType.NONE);
         r.setPassenger(freshP);
-        r.setBookedRoute(routetoBook);
         seats.forEach(
                 seat -> {
                     SeatsAndReservation seatToReserve = new SeatsAndReservation();
@@ -97,7 +91,6 @@ public class ReservationService {
         Reservation res;
         if ((res = reservationRepository.findByIdAndPassenger_Id(id, p.getId())) == null)
             throw new NoSuchReservationException();
-        List<SeatsAndReservation> seats = seatInReservationRepository.findAllByRoute_IdAndReservation_Id(res.getBookedRoute().getId(), res.getId());
         Route route;
         entityManager.lock(route = res.getBookedRoute(), LockModeType.PESSIMISTIC_WRITE);
         route.setSeatsLeft(route.getSeatsLeft() + res.getReservedSeats().size());
@@ -111,8 +104,6 @@ public class ReservationService {
             throw new NoSuchReservationException();
         List<Integer> idsToAdd = mod.getToAdd().stream().map(Seat::getId).collect(Collectors.toList());
         List<SeatsAndReservation> alreadyBookedByRoute = seatInReservationRepository.findAllByRoute_IdAndSeatIdIn(r.getBookedRoute().getId(), idsToAdd);
-        System.out.println(idsToAdd);
-        System.out.println(alreadyBookedByRoute + "  b  ");
         if (alreadyBookedByRoute.size() > 0) throw new SeatsAlreadyBookedException();
         List<SeatsAndReservation> toRemove = seatInReservationRepository.findAllByRoute_IdAndReservation_IdAndSeat_IdIn(r.getBookedRoute().getId(), r.getId(), mod.getToRemove().stream().map(Seat::getId).collect(Collectors.toList()));
         List<SeatsAndReservation> inReservation = r.getReservedSeats();
@@ -144,6 +135,7 @@ public class ReservationService {
         });
         Route booked = r.getBookedRoute();
         entityManager.lock(booked, LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(booked);
         booked.setSeatsLeft(booked.getSeatsLeft() + toRemove.size() - mod.getToAdd().size());
         return r;
     }

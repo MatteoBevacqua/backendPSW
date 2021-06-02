@@ -16,6 +16,7 @@ import reservations.journey_planner.demo.services.RouteService;
 import java.util.Date;
 import java.util.List;
 
+@SuppressWarnings({"all"})
 @RestController
 @RequestMapping("/routes")
 public class RouteController {
@@ -73,21 +74,7 @@ public class RouteController {
         return new ResponseEntity(routes, HttpStatus.OK);
     }
 
-    @GetMapping("/search/shortestPath")
-    public ResponseEntity getShortestPath(
-            @RequestParam(name = "departure") String depCity,
-            @RequestParam(name = "arrival") String arrCity,
-            @RequestParam(name = "seatsLeft", required = false) Integer seatsLeft,
-            @RequestParam(name = "day") String startDate) {
-        Date data = Utils.converter(startDate)[0];
-        List<Route> routes;
-        try {
-            routes = routeService.shortestPathInADay(depCity, arrCity, data, seatsLeft);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No city found with name");
-        }
-        return new ResponseEntity(routes, HttpStatus.OK);
-    }
+
 
     @GetMapping("search/byArrivalCity")
     public ResponseEntity<List<Route>> getByArrivalCity(
