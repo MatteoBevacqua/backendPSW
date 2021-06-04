@@ -1,8 +1,6 @@
 package reservations.journey_planner.demo.controllers;
 
-import org.apache.james.mime4j.field.datetime.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,12 +23,19 @@ public class RouteController {
 
     @GetMapping("/getById")
     public ResponseEntity<Route> getRouteById(@RequestParam(name = "routeId") Integer routeId) {
-        return new ResponseEntity<>(routeService.getById(routeId),HttpStatus.OK);
+        return new ResponseEntity<>(routeService.getById(routeId), HttpStatus.OK);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Route>> getAll() {
-        return new ResponseEntity<>(routeService.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<Route>> getAll(@RequestParam(name = "startDate", required = false) String startDate,
+                                              @RequestParam(name = "endDate", required = false) String endDate) {
+        Date from = null, to = null;
+        if (startDate != null || endDate != null) {
+            Date[] dates = Utils.converter(startDate, endDate);
+            from = dates[0];
+            to = dates[1];
+        }
+        return new ResponseEntity<>(routeService.findAll(from,to), HttpStatus.OK);
     }
 
     @GetMapping("/seatsLeft")
@@ -73,7 +78,6 @@ public class RouteController {
             routes = routeService.findByArrivalAndDepartureCityAndXSeats(depCity, arrCity, from, to, seatsLeft);
         return new ResponseEntity(routes, HttpStatus.OK);
     }
-
 
 
     @GetMapping("search/byArrivalCity")

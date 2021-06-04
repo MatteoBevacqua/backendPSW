@@ -74,7 +74,6 @@ public class PassengerService {
         passwordCred.setValue(passengerDTO.getPassword());
         user.setCredentials(Collections.singletonList(passwordCred));
         Response response = usersResource.create(user);
-        System.out.println(response.getStatus());
         if (response.getStatus() != 201) {
             System.out.println(response);
             throw new RuntimeException("Unexpected error");

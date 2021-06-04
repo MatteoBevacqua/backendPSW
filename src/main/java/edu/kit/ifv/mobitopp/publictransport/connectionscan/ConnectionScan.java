@@ -16,10 +16,10 @@ public class ConnectionScan implements RouteSearch {
 
 	@Override
 	public Optional<PublicTransportRoute> findRoute(Stop fromStart, Stop toEnd, Time atTime) {
-		if (scanNotNeeded(fromStart, toEnd, atTime)) {
+		/*if (scanNotNeeded(fromStart, toEnd, atTime)) {
 			System.out.println("not needed ?? ");
 			return Optional.empty();
-		}
+		}*/
 		PreparedSearchRequest searchRequest = newSweeperData(fromStart, toEnd, atTime);
 		return sweepOver(searchRequest);
 	}

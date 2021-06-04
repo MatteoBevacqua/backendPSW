@@ -1,21 +1,15 @@
 package reservations.journey_planner.demo.services;
 
-import org.jgrapht.GraphPath;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DirectedWeightedMultigraph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reservations.journey_planner.demo.entities.City;
 import reservations.journey_planner.demo.entities.Route;
 import reservations.journey_planner.demo.repositories.CityRepository;
 import reservations.journey_planner.demo.repositories.RouteRepository;
-import reservations.journey_planner.demo.requestPOJOs.myGraphEdge;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -59,10 +53,13 @@ public class RouteService {
     }
 
 
-
-
     @Transactional(readOnly = true)
-    public List<Route> findAll() {
+    public List<Route> findAll(Date start, Date end) {
+        if (start != null && end != null)
+            return routeRepository.findAllByDepartureTimeBetween(start, end);
+        if (start != null)
+            return routeRepository.findAllByDepartureTimeAfter(start);
+        if (end != null) return routeRepository.findAllByDepartureTimeBefore(end);
         return routeRepository.findAll();
     }
 

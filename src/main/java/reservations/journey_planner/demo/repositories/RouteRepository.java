@@ -19,6 +19,12 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
     @Query(value = "SELECT * FROM ACTIVE_ROUTES WHERE DATEDIFF(DEPARTURE_TIME,?1)=0",nativeQuery = true)
     List<Route> findAllByDepartureTime_Day(Date date);
 
+    // /all
+    List<Route> findAllByDepartureTimeBetween(Date from,Date to);
+    List<Route> findAllByDepartureTimeBefore(Date before);
+    List<Route> findAllByDepartureTimeAfter(Date after);
+
+
     List<Route> findByDepartureStation_City_NameAndSeatsLeftIsGreaterThanEqual(String cityName, int seatsLeft);
 
     List<Route> findByArrivalStation_City_NameAndSeatsLeftIsGreaterThanEqual(String cityName, int seatsLeft);

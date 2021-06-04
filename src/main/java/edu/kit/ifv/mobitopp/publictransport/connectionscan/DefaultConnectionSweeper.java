@@ -1,6 +1,8 @@
 package edu.kit.ifv.mobitopp.publictransport.connectionscan;
 
-import static java.util.stream.Collectors.toList;
+import edu.kit.ifv.mobitopp.publictransport.model.Connection;
+import edu.kit.ifv.mobitopp.publictransport.model.Connections;
+import edu.kit.ifv.mobitopp.time.Time;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,9 +12,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import edu.kit.ifv.mobitopp.publictransport.model.Connection;
-import edu.kit.ifv.mobitopp.publictransport.model.Connections;
-import edu.kit.ifv.mobitopp.time.Time;
+import static java.util.stream.Collectors.toList;
 
 class DefaultConnectionSweeper implements ConnectionSweeper {
 
@@ -39,7 +39,8 @@ class DefaultConnectionSweeper implements ConnectionSweeper {
 
 	static DefaultConnectionSweeper from(Connections connections, int intervalToCheckArrivalAtEnd) {
 		Stream<Connection> stream = connections.asCollection().stream();
-		List<Connection> sorted = stream.sorted(new ConnectionComparator()).collect(toList());
+		//List<Connection> sorted = stream.sorted(new ConnectionComparator()).collect(toList());
+		List<Connection> sorted = stream.collect(toList());
 		List<Connection> fixedConnections = Collections.unmodifiableList(sorted);
 		Function<Time, Integer> lookup = initialiseLookup(fixedConnections);
 		Function<Time, Boolean> isTooLate = createIsTooLate(fixedConnections);
