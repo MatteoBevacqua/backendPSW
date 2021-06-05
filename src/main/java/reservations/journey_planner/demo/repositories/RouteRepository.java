@@ -24,6 +24,8 @@ public interface RouteRepository extends JpaRepository<Route, Integer> {
     List<Route> findAllByDepartureTimeBefore(Date before);
     List<Route> findAllByDepartureTimeAfter(Date after);
 
+    List<Route> findAllByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfterAndArrivalTimeBefore(String depCity,String arrCity,Date from,Date to);
+    List<Route> findAllByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfterAndArrivalTimeBeforeAndSeatsLeftGreaterThanEqual(String depCity,String arrCity,Date from,Date to,int seatsLeft);
 
     List<Route> findByDepartureStation_City_NameAndSeatsLeftIsGreaterThanEqual(String cityName, int seatsLeft);
 

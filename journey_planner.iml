@@ -180,9 +180,5 @@
     <orderEntry type="library" name="Maven: org.checkerframework:checker-qual:2.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.resteasy:resteasy-jaxb-provider:3.13.2.Final" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec:2.0.0.Final" level="project" />
-    <orderEntry type="library" name="Maven: org.jgrapht:jgrapht-core:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: org.jheaps:jheaps:0.13" level="project" />
-    <orderEntry type="library" name="Maven: com.github.vlsi.mxgraph:jgraphx:4.2.2" level="project" />
-    <orderEntry type="library" name="Maven: org.jgrapht:jgrapht-ext:1.5.1" level="project" />
   </component>
 </module>

@@ -16,8 +16,7 @@ import java.util.List;
 public class RouteService {
     @Autowired
     private RouteRepository routeRepository;
-    @Autowired
-    private CityRepository cityRepository;
+
     @Autowired
     EntityManager entityManager;
 
@@ -36,6 +35,8 @@ public class RouteService {
     public List<Route> findByArrivalAndDepartureCity(String departureCity, String arrivalCity, Date start, Date end) {
         if (start == null && end == null)
             return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_Name(departureCity, arrivalCity);
+        if(start!=null && end!=null)
+            return routeRepository.findAllByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfterAndArrivalTimeBefore(departureCity,arrivalCity,start,end);
         if (start != null)
             return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfter(departureCity, arrivalCity, start);
         return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(departureCity, arrivalCity, end);
@@ -43,9 +44,10 @@ public class RouteService {
     }
 
     public List<Route> findByArrivalAndDepartureCityAndXSeats(String departureCity, String arrivalCity, Date start, Date end, int seatsLeft) {
-
         if (start == null && end == null)
             return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndSeatsLeftGreaterThanEqual(departureCity, arrivalCity, seatsLeft);
+        if(start!=null && end!=null)
+            return routeRepository.findAllByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfterAndArrivalTimeBeforeAndSeatsLeftGreaterThanEqual(departureCity,arrivalCity,start,end,seatsLeft);
         if (start != null)
             return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeAfterAndSeatsLeftGreaterThanEqual(departureCity, arrivalCity, start, seatsLeft);
         return routeRepository.findRouteByDepartureStation_City_NameAndArrivalStation_City_NameAndDepartureTimeBefore(departureCity, arrivalCity, end);
