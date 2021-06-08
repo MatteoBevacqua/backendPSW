@@ -1,13 +1,13 @@
 package reservations.journey_planner.demo.controllers;
 
 
-import com.mysql.cj.jdbc.exceptions.MySQLTransactionRollbackException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import reservations.journey_planner.demo.configuration.EmailManagerBean;
 import reservations.journey_planner.demo.configuration.Utils;
 import reservations.journey_planner.demo.entities.Passenger;
 import reservations.journey_planner.demo.entities.Reservation;
@@ -22,7 +22,6 @@ import reservations.journey_planner.demo.requestPOJOs.RouteAndSeats;
 import reservations.journey_planner.demo.services.ReservationService;
 import reservations.journey_planner.demo.services.SeatService;
 
-
 import javax.validation.Valid;
 import java.util.List;
 
@@ -36,6 +35,8 @@ public class ReservationController {
     ReservationService reservationService;
     @Autowired
     SeatService seatService;
+    @Autowired
+    EmailManagerBean emailManagerBean;
 
     @GetMapping("/all")
     public ResponseEntity getAll() {
@@ -69,7 +70,8 @@ public class ReservationController {
         Route toBook = r.getRoute();
         List<Seat> seatsToBook = r.getSeats();
         try {
-            res = reservationService.addNewReservationIfPossible(p, toBook, seatsToBook);
+            res = reservationService.addNewReservation(p, toBook, seatsToBook);
+            emailManagerBean.sendEmail(res,p);
         } catch (ReservationAlreadyExists e) {
             System.out.println("already exists");
             res = reservationService.getByPassengerIdAndRoute(jwt.getSubject(), r.getRoute().getId());
@@ -82,6 +84,7 @@ public class ReservationController {
         } catch (NoSuchPassengerException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No such passenger");
         } catch (Exception e) {
+            System.out.println(e);
             System.out.println("Transation rolled back");
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Some of the seats you were trying to book were already taken");
         }

@@ -1,23 +1,28 @@
 package reservations.journey_planner.demo.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import reservations.journey_planner.demo.configuration.Utils;
 import reservations.journey_planner.demo.entities.*;
 import reservations.journey_planner.demo.exceptions.NoSuchPassengerException;
 import reservations.journey_planner.demo.exceptions.NoSuchReservationException;
 import reservations.journey_planner.demo.exceptions.ReservationAlreadyExists;
 import reservations.journey_planner.demo.exceptions.SeatsAlreadyBookedException;
-import reservations.journey_planner.demo.repositories.*;
-
-import org.springframework.transaction.annotation.Transactional;
+import reservations.journey_planner.demo.repositories.PassengerRepository;
+import reservations.journey_planner.demo.repositories.ReservationRepository;
+import reservations.journey_planner.demo.repositories.SeatInReservationRepository;
+import reservations.journey_planner.demo.repositories.SeatRepository;
 import reservations.journey_planner.demo.requestPOJOs.ModifiedBookingDTO;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -36,8 +41,8 @@ public class ReservationService {
     @Autowired
     EntityManager entityManager;
     static Map<String, Object> timeout = Map.of("javax.persistence.lock.timeout", 2);
-
-
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     public List<Reservation> getReservationsByPassenger(Passenger p) {
         Jwt jwt = Utils.getPrincipal();
@@ -52,7 +57,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public Reservation addNewReservationIfPossible(Passenger passenger, Route route, List<Seat> seats) {
+    public Reservation addNewReservation(Passenger passenger, Route route, List<Seat> seats) {
         Passenger freshP = passengerRepository.findPassengerById(passenger.getId());
         if (freshP == null)
             throw new NoSuchPassengerException();
@@ -61,28 +66,30 @@ public class ReservationService {
         List<Seat> availableForRoute = seatRepository.findSeatsNative(route.getId());
         if (!availableForRoute.containsAll(seats))
             throw new SeatsAlreadyBookedException(availableForRoute);
-        Reservation r = new Reservation();
-        Route routetoBook = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
-        routetoBook.setSeatsLeft(routetoBook.getSeatsLeft() - seats.size());
-        entityManager.persist(routetoBook);
-        entityManager.lock(routetoBook, LockModeType.NONE);
-        r.setPassenger(freshP);
+        final Reservation r = new Reservation();
+        //  Route routetoBook = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
+        Route routetoBook = entityManager.find(Route.class, route.getId());
         seats.forEach(
                 seat -> {
                     SeatsAndReservation seatToReserve = new SeatsAndReservation();
                     seatToReserve.setRoute(routetoBook);
                     Optional<Seat> seatFromDB = seatRepository.findById(seat.getId());
-                    if(seatFromDB.isEmpty()) throw new RuntimeException("No such seat");
+                    if (seatFromDB.isEmpty()) throw new RuntimeException("No such seat");
                     seatToReserve.setSeat(seatFromDB.get());
                     seatToReserve.setReservation(r);
                     seatToReserve.setPricePaid(seat.getPricePaid());
                     r.getReservedSeats().add(seatToReserve); //salvato automaticamente
                 }
         );
-        freshP.setDistanceTravelled(freshP.getDistanceTravelled() + routetoBook.getRouteLength());
         r.setBookedRoute(routetoBook);
         r.setPassenger(freshP);
-        return reservationRepository.save(r);
+        Reservation reservation = reservationRepository.save(r);
+        entityManager.lock(routetoBook, LockModeType.PESSIMISTIC_WRITE);
+        routetoBook.setSeatsLeft(routetoBook.getSeatsLeft() - seats.size());
+        entityManager.persist(routetoBook);
+        entityManager.lock(routetoBook, LockModeType.NONE);
+        freshP.setDistanceTravelled(freshP.getDistanceTravelled() + routetoBook.getRouteLength());
+        return reservation;
 
     }
 
@@ -137,6 +144,7 @@ public class ReservationService {
         entityManager.lock(booked, LockModeType.PESSIMISTIC_WRITE);
         entityManager.refresh(booked);
         booked.setSeatsLeft(booked.getSeatsLeft() + toRemove.size() - mod.getToAdd().size());
+
         return r;
     }
 

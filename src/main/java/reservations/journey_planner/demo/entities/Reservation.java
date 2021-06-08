@@ -34,6 +34,13 @@ public class Reservation {
     @CreationTimestamp
     private Timestamp reservationBookingDate;
 
+    @Override
+    public String toString() {
+        return "Reservation : id : #" + id + "\n"+
+                "bookedRoute : " + bookedRoute.toString() +"\n"+
+                "reservationBookingDate : " + reservationBookingDate +"\n"+
+                "n° of reservedSeats : " + reservedSeats.size();
+    }
 
     @OneToMany(targetEntity = SeatsAndReservation.class,cascade = {CascadeType.PERSIST,CascadeType.REMOVE}, mappedBy = "reservation", orphanRemoval = true)
     private List<SeatsAndReservation> reservedSeats = new ArrayList<>();

@@ -48,7 +48,6 @@ public class FastestRouteController {
                                    @RequestParam(name = "hour") int hours,
                                    @RequestParam(name = "minutes") int minutes,
                                    @RequestParam(name = "date") String date) {
-
         Date[] dates = Utils.converter(date);
         List<TrainStation> trainStations = trainStationRepository.findAll();
         List<Stop> stops = new ArrayList<>();
@@ -68,8 +67,6 @@ public class FastestRouteController {
             Stop toS = trainStationStopHashMap.get(activeRoute.getArrivalStation());
             Time depTime = fromDate(activeRoute.getDepartureTime());
             Time arrTime = fromDate(activeRoute.getArrivalTime());
-            System.out.println(depTime + " " + arrTime);
-            System.out.println(activeRoute.getId() + "  "  + activeRoute.getDepartureTime() + " " + activeRoute.getArrivalTime());
             if(arrTime.isBefore(depTime))
                 arrTime = arrTime.plusDays(1);
             DefaultModifiableJourney journey = new DefaultModifiableJourney(activeRoute.getId(), day, ice, 150);
@@ -78,7 +75,6 @@ public class FastestRouteController {
             connections.add(c);
         });
         TransitNetwork network = TransitNetwork.createOf(stops, connections);
-        System.out.println("after");
         System.out.println("Routes found : " + routes.size());
         RouteSearch search = new ConnectionScan(network);
         TrainStation departure = trainStationRepository.findByCity_Name(from);

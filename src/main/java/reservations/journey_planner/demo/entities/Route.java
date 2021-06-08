@@ -1,7 +1,6 @@
 package reservations.journey_planner.demo.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -12,7 +11,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@Data
 @Entity
 @Table(name = "ACTIVE_ROUTES")
 public class Route {
@@ -50,6 +48,14 @@ public class Route {
     @Column(name="SEATS_LEFT")
     private int seatsLeft;
 
-
-
+    @Override
+    public String toString() {
+        return "Route id : #" + id +"\n"+
+                 train.toString() +"\n"+
+                "departureStation :" + departureStation.getName() +"\n"+
+                "arrivalStation :" + arrivalStation.getName() +"\n"+
+                "departureTime :" + departureTime +"\n"+
+                "arrivalTime :" + arrivalTime +"\n"+
+                "routeLength :" + routeLength;
+    }
 }

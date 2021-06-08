@@ -4,9 +4,9 @@ package reservations.journey_planner.demo.configuration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.experimental.UtilityClass;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
 import reservations.journey_planner.demo.entities.Passenger;
 
 import java.time.Instant;
@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 
-@UtilityClass
+@Component
 public class Utils {
 
     public static Date[] converter(String... dates) {
@@ -35,6 +35,7 @@ public class Utils {
 
 
     public static Jwt getPrincipal() {
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return (Jwt) principal;
     }
