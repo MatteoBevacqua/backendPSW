@@ -51,7 +51,6 @@ public class ReservationController {
     @PutMapping
     public ResponseEntity modifyReservation(@RequestBody @Valid ModifiedBookingDTO mod) {
         Passenger p = Utils.getPassengerFromToken(Utils.getPrincipal());
-        System.out.println(mod);
         try {
             return new ResponseEntity<>(reservationService.modifyReservation(p, mod), HttpStatus.OK);
         } catch (SeatsAlreadyBookedException e) {

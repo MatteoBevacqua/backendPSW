@@ -13,7 +13,6 @@ public class TrainService {
     private TrainRepository trainRepository;
 
     public List<Train> findAll() {
-        System.out.println(trainRepository.findAll());
         return trainRepository.findAll();
     }
     public List<Train> findByType(String type){

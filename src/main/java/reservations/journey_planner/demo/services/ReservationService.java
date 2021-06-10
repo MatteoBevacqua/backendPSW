@@ -40,7 +40,7 @@ public class ReservationService {
     private SeatInReservationRepository seatInReservationRepository;
     @Autowired
     EntityManager entityManager;
-    static Map<String, Object> timeout = Map.of("javax.persistence.lock.timeout", 2);
+    static Map<String, Object> timeout = Map.of("javax.persistence.lock.timeout", 20);
     @Autowired
     private JavaMailSender javaMailSender;
 
@@ -67,8 +67,7 @@ public class ReservationService {
         if (!availableForRoute.containsAll(seats))
             throw new SeatsAlreadyBookedException(availableForRoute);
         final Reservation r = new Reservation();
-        //  Route routetoBook = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
-        Route routetoBook = entityManager.find(Route.class, route.getId());
+          Route routetoBook = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
         seats.forEach(
                 seat -> {
                     SeatsAndReservation seatToReserve = new SeatsAndReservation();
@@ -84,7 +83,6 @@ public class ReservationService {
         r.setBookedRoute(routetoBook);
         r.setPassenger(freshP);
         Reservation reservation = reservationRepository.save(r);
-        entityManager.lock(routetoBook, LockModeType.PESSIMISTIC_WRITE);
         routetoBook.setSeatsLeft(routetoBook.getSeatsLeft() - seats.size());
         entityManager.persist(routetoBook);
         entityManager.lock(routetoBook, LockModeType.NONE);
@@ -100,11 +98,12 @@ public class ReservationService {
             throw new NoSuchReservationException();
         Route route;
         entityManager.lock(route = res.getBookedRoute(), LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(route);
         route.setSeatsLeft(route.getSeatsLeft() + res.getReservedSeats().size());
         reservationRepository.delete(res);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false,propagation = Propagation.REQUIRED)
     public Reservation modifyReservation(Passenger p, ModifiedBookingDTO mod) {
         Reservation r;
         if ((r = reservationRepository.findByIdAndPassenger_Id(mod.getToModify().getId(), p.getId())) == null)
@@ -144,7 +143,6 @@ public class ReservationService {
         entityManager.lock(booked, LockModeType.PESSIMISTIC_WRITE);
         entityManager.refresh(booked);
         booked.setSeatsLeft(booked.getSeatsLeft() + toRemove.size() - mod.getToAdd().size());
-
         return r;
     }
 

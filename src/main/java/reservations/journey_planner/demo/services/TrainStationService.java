@@ -18,6 +18,5 @@ public class TrainStationService {
 
     public List<TrainStation> getByCity(String city) {
         return trainStationRepository.getTrainStationByCity_Name(city);
-
     }
 }
