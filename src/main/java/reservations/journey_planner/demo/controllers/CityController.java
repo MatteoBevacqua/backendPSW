@@ -11,7 +11,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*", exposedHeaders = "If-Match")
 @RestController
-@RequestMapping("cities")
+@RequestMapping("/cities")
 public class CityController {
     @Autowired
     private CityService cityService;

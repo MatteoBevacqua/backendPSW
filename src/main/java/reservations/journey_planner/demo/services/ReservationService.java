@@ -143,6 +143,7 @@ public class ReservationService {
         entityManager.lock(booked, LockModeType.PESSIMISTIC_WRITE);
         entityManager.refresh(booked);
         booked.setSeatsLeft(booked.getSeatsLeft() + toRemove.size() - mod.getToAdd().size());
+
         return r;
     }
 

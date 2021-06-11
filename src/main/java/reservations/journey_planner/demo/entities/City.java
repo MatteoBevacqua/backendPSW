@@ -28,9 +28,11 @@ public class City implements Serializable {
     @Column(name = "COUNTRY")
     private String country;
 
+    @JsonIgnore
     @Column(name="LATITUDE")
     private float latitude;
 
+    @JsonIgnore
     @Column(name="LONGITUDE")
     private float longitude;
 
