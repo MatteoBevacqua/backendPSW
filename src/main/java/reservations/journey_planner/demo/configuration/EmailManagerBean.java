@@ -13,12 +13,14 @@ public class EmailManagerBean {
     @Autowired
     private JavaMailSender javaMailSender;
 
+
+
     @Async
-    public void sendEmail(Reservation res, Passenger p) {
+    public void sendTextEmail(String message,String subject, Passenger p) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(p.getEmail());
-        msg.setSubject("Reservation #" + res.getId());
-        msg.setText(res.toString());
+        msg.setSubject(subject);
+        msg.setText(message);
         javaMailSender.send(msg);
     }
 }

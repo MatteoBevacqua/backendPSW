@@ -45,7 +45,7 @@ public class Seat {
     @JsonIgnore
     private Train train;
 
-    @OneToMany(mappedBy = "seat",targetEntity = SeatsAndReservation.class,cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "seat",targetEntity = SeatsAndReservation.class)
     @JsonIgnore
     @ToString.Exclude
     private List<SeatsAndReservation> reservations = new ArrayList<>();

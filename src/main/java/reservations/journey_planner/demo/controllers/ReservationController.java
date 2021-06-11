@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import reservations.journey_planner.demo.configuration.EmailManagerBean;
 import reservations.journey_planner.demo.configuration.Utils;
 import reservations.journey_planner.demo.entities.Passenger;
 import reservations.journey_planner.demo.entities.Reservation;
@@ -26,7 +25,6 @@ import javax.validation.Valid;
 import java.util.List;
 
 @SuppressWarnings({"all"})
-@CrossOrigin(origins = "*", allowedHeaders = "*", exposedHeaders = "If-Match")
 @RestController
 @PreAuthorize("hasAuthority('passenger')")
 @RequestMapping("/reservations")
@@ -35,8 +33,7 @@ public class ReservationController {
     ReservationService reservationService;
     @Autowired
     SeatService seatService;
-    @Autowired
-    EmailManagerBean emailManagerBean;
+
 
     @GetMapping("/all")
     public ResponseEntity getAll() {
@@ -56,7 +53,7 @@ public class ReservationController {
         } catch (SeatsAlreadyBookedException e) {
             return new ResponseEntity(HttpStatus.CONFLICT);
         } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Non existent seat specified");
         }
     }
@@ -70,7 +67,6 @@ public class ReservationController {
         List<Seat> seatsToBook = r.getSeats();
         try {
             res = reservationService.addNewReservation(p, toBook, seatsToBook);
-            emailManagerBean.sendEmail(res,p);
         } catch (ReservationAlreadyExists e) {
             System.out.println("already exists");
             res = reservationService.getByPassengerIdAndRoute(jwt.getSubject(), r.getRoute().getId());

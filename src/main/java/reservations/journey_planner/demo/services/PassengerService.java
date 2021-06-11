@@ -75,7 +75,8 @@ public class PassengerService {
         user.setCredentials(Collections.singletonList(passwordCred));
         Response response = usersResource.create(user);
         if (response.getStatus() != 201) {
-            System.out.println(response);
+            System.out.println(response.getStatus());
+            System.out.println(response.getEntity());
             throw new RuntimeException("Unexpected error");
         }
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");

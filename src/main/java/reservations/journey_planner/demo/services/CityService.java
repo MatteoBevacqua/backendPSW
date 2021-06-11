@@ -20,9 +20,7 @@ public class CityService {
         return cityRepository.getAllByNameContains(name);
     }
 
-    public List<City> findByName(String name) {
-
-        return cityRepository.findAllByName(name);
-
+    public City findByName(String name) {
+        return cityRepository.findByName(name);
     }
 }
