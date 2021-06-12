@@ -25,7 +25,7 @@ public class PassengerController {
             System.out.println(e);
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("The supplied email is already in use");
         } catch (RuntimeException e) {
-            System.out.println(e);
+            System.out.println(e.getCause());
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Failed to reach auth server,try again later");
         }
         return new ResponseEntity<>(p, HttpStatus.OK);

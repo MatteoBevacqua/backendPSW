@@ -20,10 +20,7 @@ import reservations.journey_planner.demo.requestPOJOs.ModifiedBookingDTO;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -45,6 +42,7 @@ public class ReservationService {
     @Autowired
     private EmailManagerBean emailManager;
 
+    @Transactional(readOnly = true)
     public List<Reservation> getReservationsByPassenger(Passenger p) {
         Jwt jwt = Utils.getPrincipal();
         String pId = Utils.getPassengerFromToken(jwt).getId();
@@ -53,8 +51,49 @@ public class ReservationService {
         return reservationRepository.findAllByPassenger(managed);
     }
 
+    @Transactional(readOnly = true)
     public Reservation getByPassengerIdAndRoute(String passId, Integer routeid) {
         return reservationRepository.findReservationByPassenger_IdAndBookedRoute_Id(passId, routeid);
+    }
+
+    @Deprecated
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public Reservation addNewReservationLockTable(Passenger passenger, Route route, List<Seat> seats) {
+        Passenger passengerData = passengerRepository.findPassengerById(passenger.getId());
+        if (passengerData == null)
+            throw new NoSuchPassengerException();
+        if (reservationRepository.existsReservationsByPassenger_IdAndBookedRoute_Id(passenger.getId(), route.getId()))
+            throw new ReservationAlreadyExists();
+        Route routetoBook = entityManager.find(Route.class, route.getId());
+        entityManager.createNativeQuery("LOCK TABLES SEATS_PER_RESERVATION WRITE,SEAT READ,ACTIVE_ROUTES AS R READ,RESERVATION WRITE;").executeUpdate();
+        List<Seat> availableForRoute = seatRepository.findSeatsNative(route.getId());
+        if (!availableForRoute.containsAll(seats)) {
+            entityManager.createNativeQuery("UNLOCK TABLES ").executeUpdate();
+            throw new SeatsAlreadyBookedException();
+        }
+        Reservation r = new Reservation();
+        r.setBookedRoute(routetoBook);
+        r.setPassenger(passengerData);
+        r = reservationRepository.save(r);
+        Reservation finalR = r;
+        seats.forEach(
+                seat -> {
+                    SeatsAndReservation seatToReserve = new SeatsAndReservation();
+                    Seat seatFromDB = availableForRoute.stream().filter(seat1 -> seat1.getId() == seat.getId()).findFirst().get();
+                    seatToReserve.setSeat(seatFromDB);
+                    seatToReserve.setReservation(finalR);
+                    seatToReserve.setRoute(routetoBook);
+                    seatToReserve.setPricePaid(seat.getPricePaid());
+                    seatInReservationRepository.save(seatToReserve); //salvato automaticamente
+                }
+        );
+        entityManager.createNativeQuery("UNLOCK TABLES ;").executeUpdate();
+        Route newOne = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
+        newOne.setSeatsLeft(newOne.getSeatsLeft() - seats.size());
+        entityManager.persist(newOne);
+        passengerData.setDistanceTravelled(passengerData.getDistanceTravelled() + routetoBook.getRouteLength());
+        emailManager.sendTextEmail(r.toString(), "Reservation #" + r.getId() + " added", passenger);
+        return r;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
@@ -116,9 +155,9 @@ public class ReservationService {
         System.out.println(mod.getToRemove() + " " + r.getId());
         ListIterator<SeatsAndReservation> iterator = inReservation.listIterator();
         SeatsAndReservation next;
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             next = iterator.next();
-            if(mod.getToRemove().contains(next.getSeat())) iterator.remove();
+            if (mod.getToRemove().contains(next.getSeat())) iterator.remove();
         }
         mod.getChangePrice().forEach(seat -> {
             Optional<SeatsAndReservation> s = inReservation.stream().filter(res -> res.getSeat().getId() == seat.getId()).findFirst();
