@@ -101,7 +101,7 @@ public class ReservationService {
         Passenger passengerData = passengerRepository.findPassengerById(passenger.getId());
         if (passengerData == null)
             throw new NoSuchPassengerException();
-        if (reservationRepository.existsReservationsByPassenger_IdAndBookedRoute_Id(passenger.getId(), route.getId()))
+        if (passengerData.getReservations().stream().anyMatch(reservation -> reservation.getBookedRoute().getId() == route.getId()))
             throw new ReservationAlreadyExists();
         List<Seat> availableForRoute = seatRepository.findSeatsNative(route.getId());
         if (!availableForRoute.containsAll(seats))
@@ -127,9 +127,10 @@ public class ReservationService {
         r.setPassenger(passengerData);
         Reservation reservation = reservationRepository.save(r);
         routetoBook.setSeatsLeft(routetoBook.getSeatsLeft() - seats.size());
-        entityManager.lock(routetoBook, LockModeType.NONE);
         entityManager.persist(routetoBook);
+        entityManager.lock(routetoBook, LockModeType.NONE);
         passengerData.setDistanceTravelled(passengerData.getDistanceTravelled() + routetoBook.getRouteLength());
+        passengerData.getReservations().add(reservation);
         emailManager.sendTextEmail(r.toString(), "Reservation #" + r.getId() + " added", passenger);
         return reservation;
     }

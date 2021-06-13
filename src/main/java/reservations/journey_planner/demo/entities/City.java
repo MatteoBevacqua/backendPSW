@@ -33,10 +33,10 @@ public class City implements Serializable {
     @Column(name="LONGITUDE")
     private float longitude;
 
+    @JsonIgnore
     @ToString.Exclude
     @OneToMany(mappedBy = "city")
-    @JsonIgnore
-    private transient List<TrainStation> trainStations;
+    private List<TrainStation> trainStations;
 
     public Point2D toPoint(){
        return new Point2D.Double(latitude,longitude);

@@ -66,8 +66,8 @@ public class PassengerService {
         user.setLastName(passengerDTO.getLastName());
         user.setEmail(passengerDTO.getEmail());
         user.setEnabled(true);
-     // non funziona
-     //   user.setClientRoles(Collections.singletonMap("spring-boot", Collections.singletonList("passenger")));
+        // non funziona
+        //   user.setClientRoles(Collections.singletonMap("spring-boot", Collections.singletonList("passenger")));
         CredentialRepresentation passwordCred = new CredentialRepresentation();
         passwordCred.setTemporary(false);
         passwordCred.setType(CredentialRepresentation.PASSWORD);
@@ -93,5 +93,7 @@ public class PassengerService {
         userResource.roles().clientLevel(clientRepresentation.getId()).add(Collections.singletonList(roleRepresentation));
     }
 
-
+    public Passenger getInfo(Passenger p) {
+        return passengerRepository.findPassengerById(p.getId());
+    }
 }

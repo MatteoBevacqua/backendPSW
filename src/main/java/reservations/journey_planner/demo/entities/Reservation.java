@@ -18,6 +18,7 @@ public class Reservation {
     private int id;
 
     @ManyToOne
+    @JoinColumn(name = "PASSENGER_ID")
     private Passenger passenger;
 
     @ManyToOne
@@ -36,7 +37,7 @@ public class Reservation {
                 "n° of reservedSeats : " + reservedSeats.size();
     }
 
-    @OneToMany(targetEntity = SeatsAndReservation.class,cascade = {CascadeType.PERSIST,CascadeType.REMOVE}, mappedBy = "reservation", orphanRemoval = true)
+    @OneToMany(targetEntity = SeatsAndReservation.class,mappedBy = "reservation",cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
     private List<SeatsAndReservation> reservedSeats = new ArrayList<>();
 
 

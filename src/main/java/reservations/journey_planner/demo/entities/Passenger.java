@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -32,8 +33,8 @@ public class Passenger {
     private String telephoneNumber;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "passenger",cascade = CascadeType.REMOVE,orphanRemoval = true)
     @ToString.Exclude
-    private List<Reservation> reservations;
+    @OneToMany(mappedBy = "passenger",cascade = {CascadeType.REMOVE,CascadeType.PERSIST},orphanRemoval = true)
+    private List<Reservation> reservations = new ArrayList<>();
 
 }
