@@ -74,11 +74,9 @@ public class PassengerService {
         passwordCred.setValue(passengerDTO.getPassword());
         user.setCredentials(Collections.singletonList(passwordCred));
         Response response = usersResource.create(user);
-        if (response.getStatus() != 201) {
-            System.out.println(response.getStatus());
-            System.out.println(response.getEntity());
+        if (response.getStatus() != 201)
             throw new RuntimeException("Unexpected error");
-        }
+
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
         Passenger toAdd = passengerDTO.asPassenger();
         toAdd.setId(userId);

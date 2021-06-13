@@ -62,7 +62,6 @@ public class    RouteController {
             @RequestParam(name = "seatsLeft", required = false) Integer seatsLeft,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate) {
-        System.out.println(startDate + " " + endDate);
         Date from = null, to = null;
         if (startDate != null || endDate != null) {
             Date[] dates = Utils.converter(startDate, endDate);

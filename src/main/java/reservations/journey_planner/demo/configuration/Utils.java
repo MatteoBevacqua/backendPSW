@@ -36,7 +36,6 @@ public class Utils {
 
     public static Jwt getPrincipal() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println(principal);
         return (Jwt) principal;
     }
 

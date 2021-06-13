@@ -68,7 +68,7 @@ public class ReservationService {
         entityManager.createNativeQuery("LOCK TABLES SEATS_PER_RESERVATION WRITE,SEAT READ,ACTIVE_ROUTES AS R READ,RESERVATION WRITE;").executeUpdate();
         List<Seat> availableForRoute = seatRepository.findSeatsNative(route.getId());
         if (!availableForRoute.containsAll(seats)) {
-            entityManager.createNativeQuery("UNLOCK TABLES ").executeUpdate();
+            entityManager.createNativeQuery("UNLOCK TABLES").executeUpdate();
             throw new SeatsAlreadyBookedException();
         }
         Reservation r = new Reservation();
@@ -87,7 +87,7 @@ public class ReservationService {
                     seatInReservationRepository.save(seatToReserve); //salvato automaticamente
                 }
         );
-        entityManager.createNativeQuery("UNLOCK TABLES ;").executeUpdate();
+        entityManager.createNativeQuery("UNLOCK TABLES;").executeUpdate();
         Route newOne = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
         newOne.setSeatsLeft(newOne.getSeatsLeft() - seats.size());
         entityManager.persist(newOne);
@@ -96,7 +96,7 @@ public class ReservationService {
         return r;
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Reservation addNewReservation(Passenger passenger, Route route, List<Seat> seats) {
         Passenger passengerData = passengerRepository.findPassengerById(passenger.getId());
         if (passengerData == null)
@@ -114,10 +114,13 @@ public class ReservationService {
                     seatToReserve.setRoute(routetoBook);
                     Optional<Seat> seatFromDB = seatRepository.findById(seat.getId());
                     if (seatFromDB.isEmpty()) throw new RuntimeException("No such seat");
+                    Seat temp = seatFromDB.get();
                     seatToReserve.setSeat(seatFromDB.get());
                     seatToReserve.setReservation(r);
+                    if (seat.getPricePaid() != temp.getChildrenPrice() && seat.getPricePaid() != temp.getAdultPrice())
+                        throw new RuntimeException("Illegal price range");
                     seatToReserve.setPricePaid(seat.getPricePaid());
-                    r.getReservedSeats().add(seatToReserve); //salvato automaticamente
+                    r.getReservedSeats().add(seatToReserve);
                 }
         );
         r.setBookedRoute(routetoBook);
@@ -141,7 +144,7 @@ public class ReservationService {
         entityManager.refresh(route);
         route.setSeatsLeft(route.getSeatsLeft() + res.getReservedSeats().size());
         reservationRepository.delete(res);
-        emailManager.sendTextEmail("Your reservation #" + res.getId() + "has been deleted", "Reservation deleter", p);
+        emailManager.sendTextEmail("Your reservation #" + res.getId() + "has been deleted", "Booking #" + res.getId() + " deleted", p);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -152,7 +155,6 @@ public class ReservationService {
         List<SeatsAndReservation> alreadyBookedByRoute = seatInReservationRepository.findAllByRoute_IdAndSeatIdIn(r.getBookedRoute().getId(), mod.getToAdd().stream().map(Seat::getId).collect(Collectors.toList()));
         if (alreadyBookedByRoute.size() > 0) throw new SeatsAlreadyBookedException();
         List<SeatsAndReservation> inReservation = r.getReservedSeats();
-        System.out.println(mod.getToRemove() + " " + r.getId());
         ListIterator<SeatsAndReservation> iterator = inReservation.listIterator();
         SeatsAndReservation next;
         while (iterator.hasNext()) {

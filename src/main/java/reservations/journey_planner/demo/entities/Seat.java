@@ -3,17 +3,13 @@ package reservations.journey_planner.demo.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 
-@Getter
-@Setter
+
 @Data
 @Entity
 @Table(name = "SEAT", schema = "JOURNEY_PLANNER")
@@ -47,7 +43,6 @@ public class Seat {
 
     @OneToMany(mappedBy = "seat",targetEntity = SeatsAndReservation.class)
     @JsonIgnore
-    @ToString.Exclude
     private List<SeatsAndReservation> reservations = new ArrayList<>();
 
     @Transient

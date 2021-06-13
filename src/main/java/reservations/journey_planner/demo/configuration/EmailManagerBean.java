@@ -6,7 +6,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import reservations.journey_planner.demo.entities.Passenger;
-import reservations.journey_planner.demo.entities.Reservation;
 
 @Component
 public class EmailManagerBean {

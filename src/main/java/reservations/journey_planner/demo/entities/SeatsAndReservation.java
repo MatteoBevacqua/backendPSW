@@ -1,20 +1,13 @@
 package reservations.journey_planner.demo.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.istack.Nullable;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 @ToString
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "SEATS_PER_RESERVATION")
 public class SeatsAndReservation {

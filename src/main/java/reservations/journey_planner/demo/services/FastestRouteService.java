@@ -29,7 +29,7 @@ public class FastestRouteService {
     private static final RelativeTime noChangeTime = RelativeTime.ZERO;
     private static Time day = new SimpleTime();
     private List<Stop> stops;
-    private     HashMap<TrainStation, Stop> trainStationStopHashMap;
+    private  HashMap<TrainStation, Stop> trainStationStopHashMap;
     static final TransportSystem train = new TransportSystem("Train");
 
     static Time fromDate(Date d) {
@@ -67,7 +67,6 @@ public class FastestRouteService {
             connections.add(c);
         });
         TransitNetwork network = TransitNetwork.createOf(stops, connections);
-        System.out.println("Routes found : " + routes.size());
         RouteSearch search = new ConnectionScan(network);
         TrainStation departure = trainStationRepository.findByCity_Name(from);
         TrainStation arrival = trainStationRepository.findByCity_Name(to);
@@ -75,12 +74,9 @@ public class FastestRouteService {
         Stop too = trainStationStopHashMap.get(arrival);
         //tempo di partenza
         Optional<PublicTransportRoute> route = search.findRoute(fromm, too, new SimpleTime().plusHours(hours).plusMinutes(minutes));
-        System.out.println(route.isPresent());
-        if (route.isPresent())
-            System.out.println(route.get());
-        else return null;
+        if (route.isEmpty())
+             return null;
         List<Route> path = route.get().connections().stream().map(connection -> routes.stream().filter(r -> r.getId() == connection.id()).findFirst().get()).collect(Collectors.toList());
-        System.out.println(path);
         return path;
     }
 }

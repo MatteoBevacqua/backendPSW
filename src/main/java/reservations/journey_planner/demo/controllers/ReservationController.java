@@ -53,7 +53,6 @@ public class ReservationController {
         } catch (SeatsAlreadyBookedException e) {
             return new ResponseEntity(HttpStatus.CONFLICT);
         } catch (RuntimeException e) {
-            System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Non existent seat specified");
         }
     }
@@ -68,18 +67,14 @@ public class ReservationController {
         try {
             res = reservationService.addNewReservation(p, toBook, seatsToBook);
         } catch (ReservationAlreadyExists e) {
-            System.out.println("already exists");
             //406
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         } catch (SeatsAlreadyBookedException e) {
-            System.out.println("Seats already booked");
             //409
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (NoSuchPassengerException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No such passenger");
         } catch (Exception e) {
-            System.out.println(e);
-            System.out.println("Transation rolled back");
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Some of the seats you were trying to book were already taken");
         }
         return new ResponseEntity<>(res, HttpStatus.OK);

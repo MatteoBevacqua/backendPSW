@@ -50,7 +50,6 @@ public class TransitNetwork {
 	}
 
 	private boolean notAvailable(Stop fromStart, Stop toEnd) {
-		System.out.println("Stops mismatch");
 		return !stops.contains(fromStart) || !stops.contains(toEnd);
 	}
 
