@@ -9,8 +9,6 @@ import edu.kit.ifv.mobitopp.time.RelativeTime;
 import edu.kit.ifv.mobitopp.time.SimpleTime;
 import edu.kit.ifv.mobitopp.time.Time;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import reservations.journey_planner.demo.entities.Route;
 import reservations.journey_planner.demo.entities.TrainStation;
@@ -28,20 +26,20 @@ public class FastestRouteService {
     RouteRepository routeRepository;
     private static final RelativeTime noChangeTime = RelativeTime.ZERO;
     private static Time day = new SimpleTime();
-    private List<Stop> stops;
-    private  HashMap<TrainStation, Stop> trainStationStopHashMap;
+
     static final TransportSystem train = new TransportSystem("Train");
 
     static Time fromDate(Date d) {
         return day.plusHours(d.getHours()).plusMinutes(d.getMinutes());
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void createMesh(){
+
+
+    public List<Route> computeFastestRoute(String from, String to, int hours, int minutes, Date date) {
+        HashMap<TrainStation, Stop> trainStationStopHashMap = new HashMap<>();
         List<TrainStation> trainStations = trainStationRepository.findAll();
-         stops = new ArrayList<>();
+        List<Stop> stops = new ArrayList<>();
         List<DefaultStation> stations = new ArrayList<>();
-        trainStationStopHashMap = new HashMap<>();
         trainStations.forEach(trainStation -> {
             DefaultStation s;
             Stop stop;
@@ -49,9 +47,6 @@ public class FastestRouteService {
             stops.add(stop = new Stop(s.id(), trainStation.getName(), trainStation.getCity().toPoint(), noChangeTime, s, s.id()));
             trainStationStopHashMap.put(trainStation, stop);
         });
-    }
-
-    public List<Route> computeFastestRoute(String from, String to, int hours, int minutes, Date date) {
         Connections connections = new Connections();
         List<Route> routes = routeRepository.findAllByDepartureTime_Day(date);
         routes.forEach(activeRoute -> {
@@ -75,8 +70,7 @@ public class FastestRouteService {
         //tempo di partenza
         Optional<PublicTransportRoute> route = search.findRoute(fromm, too, new SimpleTime().plusHours(hours).plusMinutes(minutes));
         if (route.isEmpty())
-             return null;
-        List<Route> path = route.get().connections().stream().map(connection -> routes.stream().filter(r -> r.getId() == connection.id()).findFirst().get()).collect(Collectors.toList());
-        return path;
+            return null;
+        return route.get().connections().stream().map(connection -> routes.stream().filter(r -> r.getId() == connection.id()).findFirst().get()).collect(Collectors.toList());
     }
 }

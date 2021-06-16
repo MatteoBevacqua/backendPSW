@@ -2,12 +2,9 @@ package reservations.journey_planner.demo.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reservations.journey_planner.demo.entities.Route;
-import reservations.journey_planner.demo.repositories.CityRepository;
 import reservations.journey_planner.demo.repositories.RouteRepository;
 
-import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
 
@@ -16,9 +13,6 @@ import java.util.List;
 public class RouteService {
     @Autowired
     private RouteRepository routeRepository;
-
-    @Autowired
-    EntityManager entityManager;
 
 
     public Integer seatsLeft(Integer routeID) {
@@ -55,7 +49,7 @@ public class RouteService {
     }
 
 
-    @Transactional(readOnly = true)
+
     public List<Route> findAll(Date start, Date end) {
         if (start != null && end != null)
             return routeRepository.findAllByDepartureTimeBetween(start, end);
@@ -66,7 +60,7 @@ public class RouteService {
     }
 
 
-    @Transactional(readOnly = true)
+
     public List<Route> findByDepartureCity(String cityName, Date start, Date end) {
         if (start == null && end == null)
             return routeRepository.findAllByDepartureStation_City_Name(cityName.toLowerCase());
@@ -76,6 +70,7 @@ public class RouteService {
             return routeRepository.findAllByDepartureStation_City_NameAndDepartureTimeBefore(cityName, start);
         return routeRepository.findAllByDepartureStation_City_NameAndDepartureTimeAfter(cityName, end);
     }
+
 
 
     public List<Route> findByDepartureCityAndXSeatsLeft(String cityName, int seatsLeft) {

@@ -76,7 +76,6 @@ public class PassengerService {
         Response response = usersResource.create(user);
         if (response.getStatus() != 201)
             throw new RuntimeException("Unexpected error");
-
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
         Passenger toAdd = passengerDTO.asPassenger();
         toAdd.setId(userId);

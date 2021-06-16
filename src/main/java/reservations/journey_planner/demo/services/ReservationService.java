@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 @Service
 public class ReservationService {
     @Autowired
-    PassengerService passengerService;
-    @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
     private PassengerRepository passengerRepository;
@@ -103,21 +101,19 @@ public class ReservationService {
             throw new NoSuchPassengerException();
         if (passengerData.getReservations().stream().anyMatch(reservation -> reservation.getBookedRoute().getId() == route.getId()))
             throw new ReservationAlreadyExists();
+        Route routetoBook = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
         List<Seat> availableForRoute = seatRepository.findSeatsNative(route.getId());
         if (!availableForRoute.containsAll(seats))
             throw new SeatsAlreadyBookedException();
         final Reservation r = new Reservation();
-        Route routetoBook = entityManager.find(Route.class, route.getId(), LockModeType.PESSIMISTIC_WRITE);
         seats.forEach(
                 seat -> {
                     SeatsAndReservation seatToReserve = new SeatsAndReservation();
                     seatToReserve.setRoute(routetoBook);
-                    Optional<Seat> seatFromDB = seatRepository.findById(seat.getId());
-                    if (seatFromDB.isEmpty()) throw new RuntimeException("No such seat");
-                    Seat temp = seatFromDB.get();
-                    seatToReserve.setSeat(seatFromDB.get());
+                    Seat toCheck = availableForRoute.stream().filter(s ->s.getId() == seat.getId()).findFirst().get();
+                    seatToReserve.setSeat(toCheck);
                     seatToReserve.setReservation(r);
-                    if (seat.getPricePaid() != temp.getChildrenPrice() && seat.getPricePaid() != temp.getAdultPrice())
+                    if (seat.getPricePaid() != toCheck.getChildrenPrice() && seat.getPricePaid() != toCheck.getAdultPrice())
                         throw new RuntimeException("Illegal price range");
                     seatToReserve.setPricePaid(seat.getPricePaid());
                     r.getReservedSeats().add(seatToReserve);
@@ -153,9 +149,24 @@ public class ReservationService {
         Reservation r;
         if ((r = reservationRepository.findByIdAndPassenger_Id(mod.getToModify().getId(), p.getId())) == null)
             throw new NoSuchReservationException();
+        Route booked = r.getBookedRoute();
+        entityManager.lock(booked, LockModeType.PESSIMISTIC_WRITE);
         List<SeatsAndReservation> alreadyBookedByRoute = seatInReservationRepository.findAllByRoute_IdAndSeatIdIn(r.getBookedRoute().getId(), mod.getToAdd().stream().map(Seat::getId).collect(Collectors.toList()));
         if (alreadyBookedByRoute.size() > 0) throw new SeatsAlreadyBookedException();
         List<SeatsAndReservation> inReservation = r.getReservedSeats();
+        mod.getToAdd().forEach(seatToAdd -> {
+            if (alreadyBookedByRoute.stream().anyMatch(seat -> seat.getSeat().getId() == seatToAdd.getId()))
+                throw new SeatsAlreadyBookedException();
+            SeatsAndReservation seatsAndReservation = new SeatsAndReservation();
+            Optional<Seat> toAdd;
+            if ((toAdd = seatRepository.findById(seatToAdd.getId())).isEmpty())
+                throw new RuntimeException("No such seat");
+            seatsAndReservation.setSeat(toAdd.get());
+            seatsAndReservation.setRoute(r.getBookedRoute());
+            seatsAndReservation.setReservation(r);
+            seatsAndReservation.setPricePaid(seatToAdd.getPricePaid());
+            r.getReservedSeats().add(seatsAndReservation);
+        });
         ListIterator<SeatsAndReservation> iterator = inReservation.listIterator();
         SeatsAndReservation next;
         while (iterator.hasNext()) {
@@ -172,24 +183,8 @@ public class ReservationService {
                     seatInReservationRepository.findBySeat_IdAndReservation_Id(seat.getId(), r.getId()).setPricePaid(seat.getPricePaid());
                 else throw new RuntimeException("Illegal price range!");
             } else
-                throw new RuntimeException("Bad seat specified");
+                throw new RuntimeException("Bad seat id specified");
         });
-        mod.getToAdd().forEach(seatToAdd -> {
-            if (alreadyBookedByRoute.stream().anyMatch(seat -> seat.getSeat().getId() == seatToAdd.getId()))
-                throw new SeatsAlreadyBookedException();
-            SeatsAndReservation seatsAndReservation = new SeatsAndReservation();
-            Optional<Seat> toAdd;
-            if ((toAdd = seatRepository.findById(seatToAdd.getId())).isEmpty())
-                throw new RuntimeException("No such seat");
-            seatsAndReservation.setSeat(toAdd.get());
-            seatsAndReservation.setRoute(r.getBookedRoute());
-            seatsAndReservation.setReservation(r);
-            seatsAndReservation.setPricePaid(seatToAdd.getPricePaid());
-            r.getReservedSeats().add(seatsAndReservation);
-        });
-        Route booked = r.getBookedRoute();
-        entityManager.lock(booked, LockModeType.PESSIMISTIC_WRITE);
-        entityManager.refresh(booked);
         booked.setSeatsLeft(booked.getSeatsLeft() + mod.getToRemove().size() - mod.getToAdd().size());
         emailManager.sendTextEmail(r.toString(), "Modified booking #" + r.getId(), p);
         return r;
