@@ -1,1 +1,2 @@
-Backend for the train reservation system written in Java using the Spring Framework and JPA for persistence and interaction with the SQL database. 
+## Spring-Boot powered backend 
+This project is the backend portion for a train reservation system written in Java using the Spring Framework and JPA for persistence. It features KIT's (Karlsruhe Institute of Technology) [mobitopp](https://mobitopp.ifv.kit.edu/) to simulate travel demand and computing traffic connections in general. The corresponding front-end, written in Dart using Flutter's web framework can be found [here](https://github.com/MatteoBevacqua/frontendPSW).
